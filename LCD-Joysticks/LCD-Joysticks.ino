@@ -13,7 +13,7 @@ LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 int pots[] = { A0, A1, A2, A3 };
 int poss[] = { 90, 90, 90, 90 };
 
-Servo base, shoulder, elbow, hand;
+Servo base, shoulder, elbow, grip;
 
 void setup() {
   // put your setup code here, to run once:
@@ -21,6 +21,9 @@ void setup() {
   lcd.begin(20, 4);
 
   base.attach(10);
+  elbow.attach(9);
+  shoulder.attach(8);
+  grip.attach(7);
 }
 
 void loop() {
@@ -46,14 +49,14 @@ void loop() {
 
     if(value < -2)
     {
-      poss[i] -= (value == -5) ? 5 : 1;
+      poss[i] -= (value == -5) ? 2 : 1;
       if(poss[i] < 5)
         poss[i] = 5;
     }
 
     if(value > 2)
     {
-      poss[i] += (value == 5) ? 5 : 1;
+      poss[i] += (value == 5) ? 2 : 1;
       
       if(poss[i] > 175)
         poss[i] = 175;
@@ -64,6 +67,10 @@ void loop() {
   }
 
   base.write(poss[0]);
+  grip.write(poss[1]);
+  elbow.write(poss[2]) 
+  ;
+  shoulder.write(poss[3]);
   delay(10);
 }
 
