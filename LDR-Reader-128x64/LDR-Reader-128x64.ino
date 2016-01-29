@@ -1,6 +1,6 @@
 #include "U8glib.h"
 
-U8GLIB_ST7920_128X64_1X u8g(13, 11, 12, U8G_PIN_NONE);
+U8GLIB_ST7920_128X64_1X u8g(10);    // Hardware SPI, 10 = CS/CE, 11 = MOSI, 13 = SCK
 
 void draw(char *raw, char *volts)
 {
