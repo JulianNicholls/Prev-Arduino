@@ -2,13 +2,16 @@
 
 U8GLIB_ST7920_128X64_1X u8g(10);    // Hardware SPI, 10 = CS/CE, 11 = MOSI, 13 = SCK
 
-void draw(char *raw, char *volts)
+void draw(int raw, double volts)
 {
   u8g.drawStr(0, 12, "Raw Value");
-  u8g.drawStr(95, 12, raw);
+  u8g.setPrintPos(95, 12);
+  u8g.print(raw);
 
   u8g.drawStr(0, 24, "Voltage");
-  u8g.drawStr(88, 24, volts);
+  u8g.setPrintPos(88, 24);
+  u8g.print(volts);
+//  u8g.print(volts % 1000)
 }
 
 void setup()
@@ -20,18 +23,14 @@ void setup()
 
 void loop()
 {
-  static char str[10], str2[10];
   int raw = analogRead(A0);
   int v   = map(raw, 0, 1023, 0, 5000);
 
-  sprintf(str, "%04d", raw);
-  sprintf(str2, "%d.%03d", v / 1000, v % 1000);
-  
   // Picture loop, required by u8g
   u8g.firstPage();
 
   do {
-    draw(str, str2);
+    draw(raw, v / 1000.0);
   }
   while(u8g.nextPage());
 
