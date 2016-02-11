@@ -11,14 +11,13 @@ void draw(int raw, double volts)
   u8g.drawStr(0, 24, "Voltage");
   u8g.setPrintPos(88, 24);
   u8g.print(volts);
-//  u8g.print(volts % 1000)
 }
 
 void setup()
 {
   pinMode(A0, INPUT);
     
-  u8g.setFont(u8g_font_7x14);
+  u8g.setFont(u8g_font_6x10);
 }
 
 void loop()
