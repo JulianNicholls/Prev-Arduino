@@ -20,24 +20,15 @@ struct _live {
 };
 
 struct _live alive_cells[] = {
-  {1, 4}, {1, 5}, {1, 6},
-  {2, 4}, {2, 7}, {2, 8}, {2, 9},
-  {3, 5}, {3, 7},
-  {4, 1}, {4, 2}, {4, 10},
-  {5, 1}, {5, 3}, {5, 8}, {5, 11},
-  {6, 1}, {6, 10}, {6, 11},
-  {7, 2}, {7, 3},
-  {8, 2}, {8, 5}, {8, 11}, {8, 13}, {8, 14},
-  {9, 2}, {9, 12}, {9, 13}, {9, 15},
-  {10, 4}, {10, 6}, {10, 13}, {10, 14}, {10, 17},
-  {11, 5}, {11, 6}, {11, 8}, {11, 13}, {11, 14}, {11, 18},
-  {12, 9}, {12, 17},
-  {13, 8}, {13, 9}, {13, 10}, {13, 11}, {13, 15}, {13, 17},
-  {14, 8}, {14, 10}, {14, 11}, {14, 15}, {14, 16}, {14, 17}, {14, 18},
-  {15, 9}, {15, 13}, {15, 14}, {15, 16},
-  {16, 14}, {16, 15},
-  {17, 10}, {17, 12}, {17, 13}, {17, 14},
-  {18, 11}, {18, 14},
+  {1, 25},
+  {2, 23}, {2, 25},
+  {3, 13}, {3, 14}, {3, 21}, {3, 22}, {3, 35}, {3, 36},
+  {4, 12}, {4, 16}, {4, 21}, {4, 22}, {4, 35}, {4, 36},
+  {5, 1}, {5, 2}, {5, 11}, {5, 17}, {5, 21}, {5, 22},
+  {6, 1}, {6, 2}, {6, 11}, {6, 15}, {6, 17}, {6, 18}, {6, 23}, {6, 25},
+  {7, 11}, {7, 17}, {7, 25},
+  {8, 12}, {8, 16},
+  {9, 13}, {9, 14},
 };
 
 const int num_alive_cells = sizeof(alive_cells) / sizeof(struct _live);
@@ -49,7 +40,7 @@ void setup()
   
   for(i = 0; i < rows; ++i) {
     for(j = 0; j < bytes; ++j) {
-      set_state(i, j, 0);
+      grid[i][j] = 0;
     }
   }
 
@@ -63,10 +54,10 @@ void setup()
 
 void draw()
 {
-  for(int row = 0; row < rows; ++row) {
-    for(int col = 0; col < cols; ++col) {
-      if(state(row, col)) {
-        u8g.drawBox(left + col * 3, top + row * 3, 2, 2);
+  for(int r = 0; r < rows; ++r) {
+    for(int c = 0; c < cols; ++c) {
+      if(state(r, c)) {
+        u8g.drawBox(left + c * 3, top + r * 3, 2, 2);
       }
     }
   }
@@ -88,7 +79,7 @@ void loop()
   update_next();
   ++generation;
   
-  delay(330);
+  delay(50);
 }
 
 void update_next(void) {
@@ -130,28 +121,28 @@ boolean state(int row, int col) {
     return 0;
 
   int cbyte = col >> 3;
-  int cmask = col & 0x7;
+  int cmask = 1 << (col & 7);
 
-  return grid[row][cbyte] & (1 << cmask);
+  return grid[row][cbyte] & cmask;
 }
 
 void set_state(int row, int col, boolean state) {
   int cbyte = col >> 3;
-  int cmask = col & 0x7;
+  int cmask = 1 << (col & 7);
 
   if(state)
-    grid[row][cbyte] |= (1 << cmask);
-   else
-    grid[row][cbyte] &= ~(1 << cmask);   
+    grid[row][cbyte] |= cmask;
+  else
+    grid[row][cbyte] &= cmask;
 }
 
 void set_new_state(int row, int col, boolean state) {
   int cbyte = col >> 3;
-  int cmask = col & 0x7;
+  int cmask = 1 << (col & 7);
 
   if(state)
-    next[row][cbyte] |= (1 << cmask);
-   else
-    next[row][cbyte] &= ~(1 << cmask);   
+    next[row][cbyte] |= cmask;
+  else
+    next[row][cbyte] &= ~cmask;   
 }
 
