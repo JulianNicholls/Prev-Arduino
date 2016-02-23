@@ -6,7 +6,7 @@ MCP23017 mcp;
 
 void setup() {
   mcp.begin();
-  
+
   mcp.write_IODIR(0);           // Set all of GPIOA as outputs
 
   mcp.pinMode(8, INPUT, true);  // Set pull-up
@@ -14,7 +14,7 @@ void setup() {
 }
 
 void loop() {
-  static byte led_pin = 0;
+  static uint8_t led_pin = 0;
 
   mcp.write_GPIO(0);
   mcp.write_pin(led_pin, 1);
@@ -24,6 +24,6 @@ void loop() {
 
   mcp.write_pin(9, !mcp.read_pin(8));
 
-  delay(250);
+  delay(150);
 }
 
