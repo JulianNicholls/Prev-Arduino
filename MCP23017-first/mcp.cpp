@@ -1,4 +1,3 @@
-#include <Arduino.h>
 #include "mcp.h"
 
 void MCP23017::write_IODIR(uint8_t value, uint8_t ab) {

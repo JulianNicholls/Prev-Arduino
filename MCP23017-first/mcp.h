@@ -1,3 +1,7 @@
+#indef __MCP23017__
+  #define __MCP23017__
+  
+#include <Arduino.h>
 #include <Wire.h>
 
 const uint8_t MCP_BASE   = 0x20;  // MCP23017
@@ -37,3 +41,4 @@ private:
   void updateRegisterBit(uint8_t bit, bool set, uint8_t address);
 };
 
+#endif  // __MCP23017__
