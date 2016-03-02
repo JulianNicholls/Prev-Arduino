@@ -1,19 +1,19 @@
 #include <LiquidCrystal.h>
 #include <Adafruit_NeoPixel.h>
 
-#define WS1812_PIN    2     // Serial Input for NeoPixels
+#define WS1812_PIN    2     // Serial Output for NeoPixels
 #define PIXELS        8     // 8 Pixels on board
 
-#define TRIG_PIN      13    // Trigger for ultrasonic
-#define ECHO_PIN      12    // Echo from ultrasonic
+#define TRIG_PIN      12    // Trigger for ultrasonic
+#define ECHO_PIN      13    // Echo from ultrasonic
 
-#define BL_PIN        9     // Backlight control for LCD
+#define BL_PIN        5     // Backlight control for LCD
 
-#define ON_TIMEOUT    30000 // Time that it needs to be off before coming on again
-#define ON_TIME       30000 // Time that it stays on
+#define ON_TIMEOUT    0000L // Time that it needs to be off before coming on again
+#define ON_TIME       10000L // Time that it stays on
 
 Adafruit_NeoPixel strip(PIXELS, WS1812_PIN, NEO_GRB | NEO_KHZ800);
-LiquidCrystal     lcd(11, 10, 6, 5, 4, 3);
+LiquidCrystal     lcd(11, 10, 9, 8, 7, 6);
 
 void setup() {
   pinMode(TRIG_PIN, OUTPUT);  // Trigger
@@ -36,13 +36,13 @@ void loop() {
 
   int dist = measureDistance();
     
-  if(dist < 40 && (millis() - last_on) > (ON_TIMEOUT + ON_TIME))
+  if(dist < 60 && (millis() - last_on) > (ON_TIMEOUT + ON_TIME))
     showMessage();
 
   if((millis() - last_on) > ON_TIME)
     turnOffLCD();
   
-  fillStrip(dist, 70, intensity);
+  fillStrip(dist, 100, intensity);
 
   intensity += int_delta;
 
@@ -85,7 +85,7 @@ void fillStrip(int dist, int max, byte intensity) {
   for(int i = 0; i < PIXELS; ++i) {
     if(i >= close)
       strip.setPixelColor(i, strip.Color(0, intensity, 0));
-     else 
+    else 
       strip.setPixelColor(i, strip.Color(intensity, 0, 0));
   }
 
@@ -93,7 +93,7 @@ void fillStrip(int dist, int max, byte intensity) {
 }
 
 void showMessage() {
-  digitalWrite(BL_PIN, HIGH);
+//  digitalWrite(BL_PIN, HIGH);
   last_on = millis();
   
   lcd.setCursor(0, 0);
@@ -107,7 +107,7 @@ void showMessage() {
 }
 
 void turnOffLCD() {
-  digitalWrite(BL_PIN, LOW);
+//  digitalWrite(BL_PIN, LOW);
   lcd.clear();
 //  lcd.print("Off");
 //  lcd.setCursor(0, 1);
