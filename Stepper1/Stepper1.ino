@@ -7,10 +7,10 @@
 ////////////////////////////////////////////////
 
 //declare variables for the motor pins
-int motorPin1 = 8;    // Blue   - 28BYJ48 pin 1
-int motorPin2 = 9;    // Pink   - 28BYJ48 pin 2
-int motorPin3 = 10;   // Yellow - 28BYJ48 pin 3
-int motorPin4 = 11;   // Orange - 28BYJ48 pin 4
+int motorPin1 = 10;    // Blue   - 28BYJ48 pin 1
+int motorPin2 = 11;    // Pink   - 28BYJ48 pin 2
+int motorPin3 = 12;   // Yellow - 28BYJ48 pin 3
+int motorPin4 = 13;   // Orange - 28BYJ48 pin 4
                       // Red    - 28BYJ48 pin 5 (VCC)
 
 const int motorSpeed    = 1600;   // us delay between steps, 1600 is absolute minimum
