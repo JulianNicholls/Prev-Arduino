@@ -36,49 +36,52 @@ bool clockwise  = true;
 
 void setup() {
   // Set the motor pins as outputs
-  
+
   pinMode(motorPin1, OUTPUT);
   pinMode(motorPin2, OUTPUT);
   pinMode(motorPin3, OUTPUT);
   pinMode(motorPin4, OUTPUT);
-  
-  Serial.begin(9600);  
+
+  Serial.begin(9600);
 }
 
 void loop() {
   char key = keypad.getKey();
 
-  if(key != NO_KEY) {
+  if (key != NO_KEY) {
     Serial.print(key);
     Serial.print(": ");
-    
-    if(key >= '0' && key <= '9') {
+
+    if (key >= '0' && key <= '9') {
       int value = key - '0';
 
-      if(digits < max_digits) {
+      if (digits < max_digits) {
         degrees = (degrees * 10) + value;
         ++digits;
+        Serial.print(degrees);
       }
     }
     else {
-      switch(key) {
+      switch (key) {
         case '*':   // Backspace
-          if(digits > 0) {
+          if (digits > 0) {
             --digits;
             degrees /= 10;
           }
           break;
 
         case '#':   // Enter
-          if(degrees != 0) {
+          if (degrees != 0) {
             rotate(degrees);
             degrees = 0;
             digits = 0;
           }
-          break;  
+          break;
 
         case 'C':   // Swap 'C'lockwise / Anti
           clockwise = !clockwise;
+          Serial.print(clockwise ? "" : "Anti-");
+          Serial.print("Clockwise");
           break;
       }
     }
@@ -95,7 +98,7 @@ void rotate(int degrees) {
   Serial.print(steps);
   Serial.print(clockwise ? " clockwise" : " anti-clockwise");
 
-  for(int i = 0; i < steps; ++i)
+  for (int i = 0; i < steps; ++i)
     clockwise ? turn_clockwise() : turn_anticlockwise();
 }
 
@@ -105,7 +108,7 @@ void rotate(int degrees) {
 
 void turn_anticlockwise()
 {
-  for(int i = 0; i < 4; ++i)
+  for (int i = 0; i < 4; ++i)
   {
     setOutput(i);
     delayMicroseconds(motor_delay);
@@ -114,7 +117,7 @@ void turn_anticlockwise()
 
 void turn_clockwise()
 {
-  for(int i = 3; i >= 0; --i)
+  for (int i = 3; i >= 0; --i)
   {
     setOutput(i);
     delayMicroseconds(motor_delay);
