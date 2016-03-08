@@ -1,16 +1,7 @@
-//#include <Key.h>
-#include <Keypad.h>
+#include <Keypad_MC17.h>
 
 const byte ROWS = 4;
 const byte COLS = 4;
-
-// Motor pins
-
-const int motorPin1 = 10;   // Blue   - 28BYJ48 pin 1
-const int motorPin2 = 11;   // Pink   - 28BYJ48 pin 2
-const int motorPin3 = 12;   // Yellow - 28BYJ48 pin 3
-const int motorPin4 = 13;   // Orange - 28BYJ48 pin 4
-                            // Red    - 28BYJ48 pin 5 (VCC)
 
 const char keys[ROWS][COLS] = {
   {'1', '2', '3', 'A'},
@@ -19,30 +10,30 @@ const char keys[ROWS][COLS] = {
   {'*', '0', '#', 'D'},
 };
 
-const int max_digits = 4;
+const int  MCP_addr   = 0x20;         // MCP23017 base address
 
-const int  motor_delay     = 1600;   // us delay between steps, 1600 is absolute minimum
+const int  max_digits = 4;
+
+const int  motor_delay     = 1250;   // us delay between steps, 1250 is absolute minimum
 const long counts_per_rev  = 512;    // Number of complete steps per full revolution
-const int  motor_bits[]    = {B01100, B00110, B00011, B01001};
+const int  motor_bits[]    = {0b1100, 0b0110, 0b0011, 0b1001};
 
-byte rowPins[ROWS] = { 9, 8, 7, 6 };
-byte colPins[COLS] = { 5, 4, 3, 2 };
+byte rowPins[ROWS] = { 0, 1, 2, 3 };  // GPA0-3 for rows
+byte colPins[COLS] = { 4, 5, 6, 7 };  // GPA4-7 for columns
 
-Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
+Keypad_MC17 keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS, MCP_addr);
 
-int degrees     = 0;
-byte digits     = 0;
-bool clockwise  = true;
+int   degrees   = 0;
+byte  digits    = 0;
+bool  clockwise = true;
 
 void setup() {
   // Set the motor pins as outputs
 
-  pinMode(motorPin1, OUTPUT);
-  pinMode(motorPin2, OUTPUT);
-  pinMode(motorPin3, OUTPUT);
-  pinMode(motorPin4, OUTPUT);
-
   Serial.begin(9600);
+  keypad.begin();
+
+  keypad.iodir_write(keypad.iodir_read() & 0x00ff); // Set Port B as outputs
 }
 
 void loop() {
@@ -100,6 +91,8 @@ void rotate(int degrees) {
 
   for (int i = 0; i < steps; ++i)
     clockwise ? turn_clockwise() : turn_anticlockwise();
+
+  Serial.println("Done");
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -124,11 +117,14 @@ void turn_clockwise()
   }
 }
 
+// Conservatively update Port B
+
 void setOutput(int out)
 {
-  digitalWrite(motorPin1, bitRead(motor_bits[out], 0));
-  digitalWrite(motorPin2, bitRead(motor_bits[out], 1));
-  digitalWrite(motorPin3, bitRead(motor_bits[out], 2));
-  digitalWrite(motorPin4, bitRead(motor_bits[out], 3));
+  int prev = keypad.pinState_set() & 0x00ff;
+  int newval = prev | (motor_bits[out] << 8);
+  
+  keypad.port_write(newval);
 }
+
 
