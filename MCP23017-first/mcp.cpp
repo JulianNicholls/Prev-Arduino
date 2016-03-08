@@ -6,6 +6,12 @@ void MCP23017::write_IODIR(uint8_t value, uint8_t ab) {
   writeRegister(address, value);
 }
 
+uint8_t MCP23017::read_GPIO(uint8_t ab) {
+  uint8_t address = ab ? GPIOB : GPIOA;
+
+  return readRegister(address);
+}
+
 void MCP23017::write_GPIO(uint8_t value, uint8_t ab) {
   uint8_t address = ab ? GPIOB : GPIOA;
 

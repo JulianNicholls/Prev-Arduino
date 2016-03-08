@@ -1,4 +1,4 @@
-#indef __MCP23017__
+#ifndef __MCP23017__
   #define __MCP23017__
   
 #include <Arduino.h>
