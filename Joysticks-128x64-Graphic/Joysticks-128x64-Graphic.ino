@@ -30,6 +30,7 @@ void draw(int raw[], int cooked[])
   // Debugging only
 
   u8g.setFont(u8g_font_u8glib_4);
+  
   for(int i = 0; i < 4; ++i ) {
     u8g.setPrintPos(i * 32, 62);
     u8g.print(raw[i]);
@@ -50,6 +51,7 @@ void loop()
   int raw[4], cooked[4];
 
   for(int i = 0; i < 4; ++i) {
+    // Reading twice is better for stability if switching between analog inputs
     int dummy = analogRead(connections[i]);
     delay(10);
     raw[i]    = analogRead(connections[i]);
