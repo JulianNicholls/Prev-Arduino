@@ -1,4 +1,4 @@
-#include "U8glib.h"
+#include <U8glib.h>
 
 U8GLIB_ST7920_128X64_1X u8g(10);    // Hardware SPI, 10 = CS/CE, 11 = MOSI, 13 = SCK
 
@@ -13,12 +13,6 @@ void loop(void)
   // Picture loop
   
   if(!done) {
-    u8g.firstPage();
-  
-    do {
-      draw();
-    } 
-    while(u8g.nextPage());
 
     done = true;
   }
