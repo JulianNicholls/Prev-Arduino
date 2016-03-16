@@ -3,7 +3,7 @@
 U8GLIB_ST7920_128X64_1X u8g(10);    // Hardware SPI, 10 = CS/CE, 11 = MOSI, 13 = SCK
 
 int       timebase    = 100;    // 100ms
-long      mv_per_div  = 1000;   // 1000mV (1V) per division
+long      mv_per_div  = 2000;   // 1000mV (1V) per division
 int       values[101];
 const int nValues     = sizeof(values) / sizeof(values[0]);
 
@@ -33,10 +33,10 @@ void update() {
     delayMicroseconds(timebase * 100);
   }
 
-  int divisor = 1023000L / (60 * mv_per_div);
+  int divisor = 1023 * mv_per_div / 60000;
   
   for(i = 0; i < nValues; ++i) {
-    values[i] = (1023 - values[i]) / divisor;
+    values[i] = 60 - (values[i] / divisor);
   }
 }
 
@@ -64,7 +64,7 @@ void draw() {
 
   u8g.drawBox(102, 0, 127, 63);
   u8g.setDefaultBackgroundColor();
-  u8g.drawStr(103, 8, "1V");
+  u8g.drawStr(103, 8, volts_str());
   u8g.drawStr(103, 16, timebase_str());
 
   u8g.setDefaultForegroundColor();
@@ -88,8 +88,19 @@ void draw() {
 //  }
 }
 
+char* volts_str() {
+  static char str[6];   // enough for "999mV\0"
+
+  if(mv_per_div >= 1000)
+    sprintf(str, "%dV", mv_per_div / 1000);
+  else
+    sprintf(str, "%dmV", mv_per_div);
+
+  return str;
+}
+
 char* timebase_str() {
-  static char str[6];   // enough for "100ms\0"
+  static char str[6];   // enough for "999ms\0"
 
   if(timebase >= 1000)
     sprintf(str, "%ds", timebase / 1000);
