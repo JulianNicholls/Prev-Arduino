@@ -7,8 +7,8 @@
 ////////////////////////////////////////////////
 
 //declare variables for the motor pins
-int motorPin1 = 10;    // Blue   - 28BYJ48 pin 1
-int motorPin2 = 11;    // Pink   - 28BYJ48 pin 2
+int motorPin1 = 10;   // Blue   - 28BYJ48 pin 1
+int motorPin2 = 11;   // Pink   - 28BYJ48 pin 2
 int motorPin3 = 12;   // Yellow - 28BYJ48 pin 3
 int motorPin4 = 13;   // Orange - 28BYJ48 pin 4
                       // Red    - 28BYJ48 pin 5 (VCC)
@@ -25,6 +25,7 @@ long  last  = 0;
 
 void setup() {
   //declare the motor pins as outputs
+  
   pinMode(motorPin1, OUTPUT);
   pinMode(motorPin2, OUTPUT);
   pinMode(motorPin3, OUTPUT);
@@ -35,7 +36,7 @@ void setup() {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void loop(){
+void loop() {
   if(count < countsperrev)
     clockwise4();
   else if(count == countsperrev * 2)
