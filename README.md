@@ -1,6 +1,9 @@
 # Arduino
 
-My Arduino Sketches
+My Arduino Sketches.
+
+If anyone is interested enough to read a blog article about how I did any 
+of these, please contact me and I'll write one.
  
 ## test-128x64ZW
 
@@ -39,13 +42,24 @@ hence the RPM are output on the serial link.
 
 ## LCD-first
 
-## WS1812A
+Very minimal check of a connected LCD display.
+
+## WS1812B
+
+Use the Adafruit NeoPixel library to drive my 8-LCD pixel bar with a rainbow pattern.
 
 ## stepper-driver
 
 ## Badge1
 
+First version of the sketch for my proximity badge. This one just displays the
+distance from an ultrasonic distance sensor in different colours of the NeoPixel strip.
+
 ## Badge2
+
+Second version of the proximity badge, which has the added 4x20 LCD. The LCD is cleared
+when there is no one around. Now that I know how to turn the backlight on and off 
+under program control, I will do that next time.
 
 ## Joysticks-128x64
 
