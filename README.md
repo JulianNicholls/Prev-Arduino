@@ -67,6 +67,8 @@ under program control, I will do that next time.
 
 ## Keypad-MC17-4x4
 
+Read a 4x4 keypad connected to a MCP23017 i2c interface.
+
 ## Keypad-MC17-4x4-Multi
 
 ## LCD-Joysticks
@@ -77,7 +79,12 @@ under program control, I will do that next time.
 
 ## Sweep
 
+Sweep a servo from one end to the other, using the Servo library.
+
 ## conway-life-128x64
+
+[John Conway's game of life](http://www.conwaylife.com/) implemented on the
+128x64 LCD. 
 
 ## keypad-MC17-stepper
 
