@@ -47,6 +47,7 @@ Very minimal check of a connected LCD display.
 ## WS1812B
 
 Use the Adafruit NeoPixel library to drive my 8-LCD pixel bar with a rainbow pattern.
+Updated to 24 LCDs.
 
 ## stepper-driver
 
@@ -84,7 +85,9 @@ Sweep a servo from one end to the other, using the Servo library.
 ## conway-life-128x64
 
 [John Conway's game of life](http://www.conwaylife.com/) implemented on the
-128x64 LCD. 
+128x64 LCD. Updated to use the newly discovered 
+[Copperhead](http://conwaylife.com/wiki/Copperhead)
+spaceship which goes across the screen in a little over 500 generations.
 
 ## keypad-MC17-stepper
 
