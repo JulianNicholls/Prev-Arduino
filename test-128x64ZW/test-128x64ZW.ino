@@ -42,7 +42,7 @@ void draw(void) {
   u8g.drawStr(70, 36, "courB08 6");
 
   u8g.setFont(u8g_font_5x8);
-  u8g.drawStr(5, 45, "2 lines of 24 characters");
+  u8g.drawStr(5, 45, "3 lines of 24 characters");
   u8g.drawStr(5, 52, "XXXXXXXXXXXXXXXXXXXXXXXX");
   u8g.drawStr(0, 59, "12345678901234567890123456");
 
