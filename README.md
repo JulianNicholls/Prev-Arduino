@@ -68,9 +68,18 @@ under program control, I will do that next time.
 
 ## Keypad-MC17-4x4
 
-Read a 4x4 keypad connected to a MCP23017 i2c interface.
+Read a 4x4 keypad connected to a MCP23017 i2c interface and output the pressed
+keys to the serial link.
+
+## Keypad-MC17-4x3-128x64
+
+Read a 4x3 keypad connected to a MCP23017 i2c interface and output the pressed
+keys to the LCD screen.
 
 ## Keypad-MC17-4x4-Multi
+
+Read a 4x4 keypad connected to a MCP23017 i2c interface and output the key press,
+release, and hold information to the serial link.
 
 ## LCD-Joysticks
 
