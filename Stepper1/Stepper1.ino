@@ -7,14 +7,14 @@
 ////////////////////////////////////////////////
 
 //declare variables for the motor pins
-int motorPin1 = 10;   // Blue   - 28BYJ48 pin 1
-int motorPin2 = 11;   // Pink   - 28BYJ48 pin 2
-int motorPin3 = 12;   // Yellow - 28BYJ48 pin 3
-int motorPin4 = 13;   // Orange - 28BYJ48 pin 4
+int motorPin1 = 3;   // Blue   - 28BYJ48 pin 1
+int motorPin2 = 4;   // Pink   - 28BYJ48 pin 2
+int motorPin3 = 5;   // Yellow - 28BYJ48 pin 3
+int motorPin4 = 6;   // Orange - 28BYJ48 pin 4
                       // Red    - 28BYJ48 pin 5 (VCC)
 
-const int motorSpeed    = 1600;   // us delay between steps, 1600 is absolute minimum
-const int countsperrev  = 512;    // Number of complete steps per full revolution
+const int motorSpeed    = 800;   // us delay between steps, 1600 for 28BYJ, 800 for STP-35
+const int countsperrev  = 200;    // Number of complete steps per full revolution
 //const int lookup8[]     = {B01000, B01100, B00100, B00110, B00010, B00011, B00001, B01001};
 const int lookup4[]     = {B01100, B00110, B00011, B01001};
 
