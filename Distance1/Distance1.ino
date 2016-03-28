@@ -1,5 +1,5 @@
-const byte TRIG_PIN     = 13;
-const byte ECHO_PIN     = 12;
+const byte TRIG_PIN     = 7;
+const byte ECHO_PIN     = 8;
 
 void setup() {
   // put your setup code here, to run once:
@@ -19,29 +19,34 @@ void loop() {
   delayMicroseconds(10);
   digitalWrite(TRIG_PIN, LOW);
 
-  // Wait for the Echo pin to go high
+//  // Wait for the Echo pin to go high
+//
+//  while(digitalRead(ECHO_PIN) == LOW)
+//    ;
+//
+//  int start = micros();
+//
+//  // Flight time is the length of time that the Echo pin is high
+//
+//  while(digitalRead(ECHO_PIN) == HIGH)
+//    ;
+//
+//  long    elapsed   = micros() - start;
 
-  while(digitalRead(ECHO_PIN) == LOW)
-    ;
-
-  int start = micros();
-
-  // Flight time is the length of time that the Echo pin is high
-
-  while(digitalRead(ECHO_PIN) == HIGH)
-    ;
-
-  int     elapsed   = micros() - start;
-  double  distance  = elapsed * 0.017163;
-  int     idist     = int(distance + 0.5);
+  long    elapsed   = pulseIn(ECHO_PIN, HIGH);
+  double  fdistance = elapsed * 0.017163; // Manual says elapsed / 58
+  int     idist     = int(fdistance + 0.5);
+  long    idistance = (elapsed + 29) / 58;
   
   Serial.print("Elapsed us: ");
   Serial.print(elapsed);
-  Serial.print(", Distance: ");
+  Serial.print(", Distance: f: ");
+  Serial.print(fdistance);
+  Serial.print(" r: ");
   Serial.print(idist);
-  Serial.print(" - ");
-  Serial.println(distance);
+  Serial.print(", i: ");
+  Serial.println(idistance);
 
-  delay(500);
+  delay(200);
 }
 
