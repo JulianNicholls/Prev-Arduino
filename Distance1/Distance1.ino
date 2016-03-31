@@ -19,24 +19,13 @@ void loop() {
   delayMicroseconds(10);
   digitalWrite(TRIG_PIN, LOW);
 
-//  // Wait for the Echo pin to go high
-//
-//  while(digitalRead(ECHO_PIN) == LOW)
-//    ;
-//
-//  int start = micros();
-//
-//  // Flight time is the length of time that the Echo pin is high
-//
-//  while(digitalRead(ECHO_PIN) == HIGH)
-//    ;
-//
-//  long    elapsed   = micros() - start;
+  // Measure the Echo pin high time
 
-  long    elapsed   = pulseIn(ECHO_PIN, HIGH);
+  int     elapsed   = pulseIn(ECHO_PIN, HIGH);
+
   double  fdistance = elapsed * 0.017163; // Manual says elapsed / 58
   int     idist     = int(fdistance + 0.5);
-  long    idistance = (elapsed + 29) / 58;
+  int     idistance = (elapsed + 29) / 58;
   
   Serial.print("Elapsed us: ");
   Serial.print(elapsed);
