@@ -11,9 +11,10 @@ void loop(void)
   static bool done = false;
   
   // Picture loop
-  
-  if(!done) {
 
+  if(!done) {
+    draw_loop();
+  
     done = true;
   }
   
@@ -21,6 +22,16 @@ void loop(void)
   
   delay(200);
 }
+
+void draw_loop() {
+  u8g.firstPage();
+  
+  do {
+    draw();
+  } 
+  while(u8g.nextPage());
+}
+
 
 void draw(void) {
   // graphic commands to redraw the complete screen should be placed here
