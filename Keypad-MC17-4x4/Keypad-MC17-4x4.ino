@@ -13,59 +13,38 @@
 #include <Keypad_MC17.h>
 #include <Wire.h>
 #include <Keypad.h>
-#include <U8glib.h>
 
 #define I2CADDR 0x20
 
 const byte ROWS = 4; // four rows
-const byte COLS = 3; // four columns
+const byte COLS = 4; // four columns
 const char keys[ROWS][COLS] = {
-  {'1','2','3'},
-  {'4','5','6'},
-  {'7','8','9'},
-  {'*','0','#'}
+  {'1', '2', '3', 'A'},
+  {'4', '5', '6', 'B'},
+  {'7', '8', '9', 'C'},
+  {'*', '0', '#', 'D'}
 };
 
 byte rowPins[ROWS] = { 0, 1, 2, 3 };  // Connect to the row pinouts of the keypad
-byte colPins[COLS] = { 4, 5, 6 };     // Connect to the column pinouts of the keypad
+byte colPins[COLS] = { 4, 5, 6, 7 };  // Connect to the column pinouts of the keypad
 
-Keypad_MC17             keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS, I2CADDR );
-U8GLIB_ST7920_128X64_1X u8g(10);    // Hardware SPI, 10 = CS/CE, 11 = MOSI, 13 = SCK
+Keypad_MC17 keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS, I2CADDR );
 
-char str[128] = "";
+//char str[128] = "";
 
 void setup(){
   keypad.begin();
-  
-  u8g.setFont(u8g_font_5x8);
+  Serial.begin(9600);
+
+  Serial.println("Initialised");
 }
   
 void loop() {
-  char key[2] = { 0, 0 };
-  key[0] = keypad.getKey();
+  char key = keypad.getKey();
   
-  if(key[0]) {
-    strcat(str, key); 
-//    Serial.println(key);
+  if(key != NO_KEY) {
+//    strcat(str, key); 
+    Serial.println(key);
   }
-
-  draw_loop();
-}
-
-////////////////////////////////////////////////////////////////////////
-
-void draw_loop() {
-  u8g.firstPage();
-  
-  do {
-    draw();
-  } 
-  while(u8g.nextPage());
-}
-
-void draw(void) {
-  // graphic commands to redraw the complete screen should be placed here
-
-  u8g.drawStr(0, 8, str);
 }
 
