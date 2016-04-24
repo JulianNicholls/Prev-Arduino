@@ -25,7 +25,7 @@
 // what our timing resolution should be, larger is better
 // as its more 'precise' - but too large and you wont get
 // accurate timing
-#define RESOLUTION 20 
+#define RESOLUTION 40 
  
 // we will store up to 100 pulse pairs (this is -a lot-)
 uint16_t pulses[100][2];  // pair is high and low pulse 
