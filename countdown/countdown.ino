@@ -15,7 +15,7 @@ const int DIGIT4  = 5;
 const int SHIFT_DATA    = 6;
 const int SHIFT_CLK     = 7;
 
-const int BEEP          = 8;
+const int BEEP_PIN      = 8;
 
 const int digits[] = { DIGIT1, DIGIT2, DIGIT3, DIGIT4 };
 
@@ -51,7 +51,7 @@ void setup() {
   
   pinMode(SHIFT_DATA, OUTPUT);
   pinMode(SHIFT_CLK, OUTPUT);
-  pinMode(BEEP, OUTPUT);
+  pinMode(BEEP_PIN, OUTPUT);
 
   keypad.begin();
 }
@@ -63,11 +63,11 @@ void loop() {
   if(state < COUNTING) {
     if(state == SETTING1) {
       entry[0] = 0;
-      light_digit(3, 0, 200, false);
+      light_digit(3, 0, 150, false);
       delay(200);      
     }
     else
-      show_str(10);
+      show_str(5);
 
     state = process_key(state);
   }
@@ -81,8 +81,8 @@ void loop() {
   }
   else { // FINISHED
     beep = (beep == LOW) ? HIGH : LOW;
-    digitalWrite(BEEP, beep);
-    delay(1);
+    digitalWrite(BEEP_PIN, beep);
+    delayMicroseconds(500);
   }
 }
 
@@ -117,7 +117,9 @@ byte process_key(byte state) {
       break;
 
     default:
-      strcat(entry, key);
+      if(strlen(entry) < 4)
+        strcat(entry, key);
+      break;
   }
   
   return SETTING;
