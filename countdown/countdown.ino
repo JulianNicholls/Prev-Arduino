@@ -7,41 +7,45 @@
 #define   COUNTING  4
 #define   FINISHED  5
 
-const int DIGIT1  = 2;
-const int DIGIT2  = 3;
-const int DIGIT3  = 4;
-const int DIGIT4  = 5;
+const byte DIGIT1  = 2;
+const byte DIGIT2  = 3;
+const byte DIGIT3  = 4;
+const byte DIGIT4  = 5;
 
-const int SHIFT_DATA    = 6;
-const int SHIFT_CLK     = 7;
+const byte SHIFT_DATA    = 6;
+const byte SHIFT_CLK     = 7;
 
-const int BEEP_PIN      = 8;
+const byte BEEP_PIN      = 8;
 
-const int digits[] = { DIGIT1, DIGIT2, DIGIT3, DIGIT4 };
+const byte digits[]   = { DIGIT1, DIGIT2, DIGIT3, DIGIT4 };
 
-const int patterns[] = { 0b11000000, 0b11101011, 0b10010010, 0b10001010, 0b10101001, 
+const byte patterns[] = { 0b11000000, 0b11101011, 0b10010010, 0b10001010, 0b10101001, 
                          0b10001100, 0b10000100, 0b11101010, 0b10000000, 0b10001000 };
 
+const byte done[]     = { 0b11000000, 0b10000111, 0b11100000, 0b10010100 };
+
+const byte underbar   = 0b11011111;
+
 const byte ROWS = 4; // four rows
-const byte COLS = 4; // four columns
+const byte COLS = 3; // four columns
 const char keys[ROWS][COLS] = {
-  {'1', '2', '3', 'A'},
-  {'4', '5', '6', 'B'},
-  {'7', '8', '9', 'C'},
-  {'*', '0', '#', 'D'}
+  { '1', '2', '3' },
+  { '4', '5', '6' },
+  { '7', '8', '9' },
+  { '*', '0', '#' }
 };
 
 byte rowPins[ROWS] = { 0, 1, 2, 3 };  // Connect to the row pinouts of the keypad
-byte colPins[COLS] = { 4, 5, 6, 7 };  // Connect to the column pinouts of the keypad
+byte colPins[COLS] = { 4, 5, 6 };     // Connect to the column pinouts of the keypad
 
-#define I2CADDR 0x20
+#define MCP_ADDR 0x20
 
-Keypad_MC17 keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS, I2CADDR);
+Keypad_MC17 keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS, MCP_ADDR);
 
 int countdown = 0;
 int start;
 
-char entry[5];
+char entry[5] = { 0 };
 
 void setup() {
   for(int i = 0; i < 4; ++i) {
@@ -51,6 +55,7 @@ void setup() {
   
   pinMode(SHIFT_DATA, OUTPUT);
   pinMode(SHIFT_CLK, OUTPUT);
+  
   pinMode(BEEP_PIN, OUTPUT);
 
   keypad.begin();
@@ -61,13 +66,8 @@ void loop() {
   static byte beep  = LOW;
   
   if(state < COUNTING) {
-    if(state == SETTING1) {
-      entry[0] = 0;
-      light_digit(3, 0, 150, false);
-      delay(200);      
-    }
-    else
-      show_str(5);
+    show_str(5);
+    light_digit(3, underbar, 5, false);
 
     state = process_key(state);
   }
@@ -80,9 +80,10 @@ void loop() {
       show_time(left);
   }
   else { // FINISHED
+    show_done();
     beep = (beep == LOW) ? HIGH : LOW;
     digitalWrite(BEEP_PIN, beep);
-    delayMicroseconds(500);
+//    delayMicroseconds(500);
   }
 }
 
@@ -110,12 +111,6 @@ byte process_key(byte state) {
       start     = millis();
       return COUNTING;
 
-    case 'A':
-    case 'B':
-    case 'C':
-    case 'D':
-      break;
-
     default:
       if(strlen(entry) < 4)
         strcat(entry, key);
@@ -140,6 +135,41 @@ void show_time(int seconds) {
   }
 }
 
+void show_str(int on_time) {
+  size_t len     = strlen(entry); // 0 -> Nothing, 1 -> 2, 2 -> 1, 3 -> 0, 4 -> 0
+  int    d_first = 0;
+  int    d_last  = 2;
+  int    e_index = 0;
+
+  switch(len) {
+    case 0:
+      return;
+
+    case 1:
+    case 2:
+    case 3:
+      d_first = 3 - len;
+      break;
+
+    case 4:
+      d_last = 3;
+  }
+  
+  for(int i = d_first; i <= d_last; ++i) {
+    byte pattern = patterns[entry[e_index++] - '0'];
+
+    if(i == d_last - 2)
+      bitWrite(pattern, 7, 0);
+      
+    light_digit(i, pattern, on_time, false);
+  }
+}
+
+void show_done() {
+  for(int i = 0; i < 4; ++i)
+    light_digit(i, done[i], 5, false);
+}
+
 void light_digit(byte digit, byte value, int on_time, bool suppress_zero) {
   if(!suppress_zero || value != 0) {
     digitalWrite(digits[digit], HIGH);
@@ -149,19 +179,6 @@ void light_digit(byte digit, byte value, int on_time, bool suppress_zero) {
 
   delay(on_time);
   digitalWrite(digits[digit], LOW);
-}
-
-void show_str(int on_time) {
-  int e_index = 0;
-  
-  for(int i = 4 - strlen(entry); i < 4; ++i) {
-    byte pattern = patterns[entry[e_index++] - '0'];
-
-    if(i == 1)
-      bitWrite(pattern, 7, 0);
-
-    light_digit(i, pattern, on_time, false);
-  }
 }
 
 void countdown_from_str() {
