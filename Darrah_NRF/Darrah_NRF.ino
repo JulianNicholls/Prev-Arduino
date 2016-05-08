@@ -17,8 +17,8 @@
 
 // Define your pins here!
 #include <SPI.h>
-#define CE_pin 4
-#define CSN_pin 5
+#define CE_pin 7
+#define CSN_pin 8
 #define IRQ_pin 2
 #define MOSI_pin 11
 #define MISO_pin 12
