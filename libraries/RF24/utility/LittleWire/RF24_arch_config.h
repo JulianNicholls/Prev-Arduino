@@ -9,7 +9,7 @@
   #include <stddef.h>
 
   // Additional fixes for LittleWire
-  #include <LittleWireSPI/littlewirespi.h>
+  #include <LittleWireSPI/LittleWireSPI.h>
   #include <LittleWireSPI/avr_fixes.h>
   extern LittleWireSPI _SPI;
 

@@ -17,8 +17,10 @@
 
 #include "RF24_config.h"
 
-#if defined (RF24_LINUX) || defined (LITTLEWIRE)
+#if defined (RF24_LINUX)
   #include "utility/includes.h"
+#elif LITTLEWIRE
+  #include <LittleWireSPI/LittleWireSPI.h>
 #elif defined SOFTSPI
   #include <DigitalIO.h>
 #endif
