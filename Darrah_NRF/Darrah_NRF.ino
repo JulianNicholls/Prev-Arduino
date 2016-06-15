@@ -146,10 +146,13 @@ void get_data() {
   else if(data_in[1] == 7) {  // not yet implemented, will be for dedicated function like temp reads
   }
   else {
-    Serial.println("No Mode Byte Identified!");//this is printed if a mode was not defined
-    for(int i = 1; i < 4; ++i)
-    Serial.print(char(data_in[i]));//just print out whatever was recieved
-    Serial.println("  ");
+    Serial.print("No Mode Byte Identified! - ");//this is printed if a mode was not defined
+    for(int i = 0; i < 4; ++i) {
+      Serial.print(data_in[i], HEX);  // just print out whatever was received
+      Serial.print(" ");
+    }
+
+    Serial.println();
   }
   
   digitalWrite(CSN_pin, LOW);
@@ -157,7 +160,6 @@ void get_data() {
   digitalWrite(CSN_pin, HIGH);
 
   NRFwrite_bit_write(7,6,1);//clear the RX interrupt flag
-
 }
 
 ///////////////////////////////////////////////////////////////////////////
