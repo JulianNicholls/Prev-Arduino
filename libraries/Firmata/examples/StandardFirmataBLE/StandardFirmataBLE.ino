@@ -20,71 +20,32 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: January 10th, 2016
-*/
-
-/*
-  README
-
-  StandardFirmataEthernetPlus is a client implementation. You will need a Firmata client library
-  with a network transport that can act as a server in order to establish a connection between
-  StandardFirmataEthernetPlus and the Firmata client application.
-
-  StandardFirmataEthernetPlus adds additional features that may exceed the Flash and
-  RAM sizes of Arduino boards such as ATMega328p (Uno) and ATMega32u4
-  (Leonardo, Micro, Yun, etc). It is best to use StandardFirmataPlus with a board that
-  has > 32k Flash and > 3k RAM such as: Arduino Mega, Arduino Due, Teensy 3.0/3.1/3.2, etc.
-
-  This sketch consumes too much Flash and RAM to run reliably on an
-  Arduino Leonardo, Yun, ATMega32u4-based board. Use StandardFirmataEthernet.ino instead
-  for those boards and other boards that do not meet the Flash and RAM requirements.
-
-  To use StandardFirmataEthernet you will need to have one of the following
-  boards or shields:
-
-  - Arduino Ethernet shield (or clone)
-  - Arduino Ethernet board (or clone)
-
-  Follow the instructions in the ethernetConfig.h file (ethernetConfig.h tab in Arduino IDE) to
-  configure your particular hardware.
-
-  NOTE: If you are using an Arduino Ethernet shield you cannot use the following pins on
-  the following boards. Firmata will ignore any requests to use these pins:
-
-  - Arduino Mega: (D4, D10, D50, D51, D52, D53)
-  - Arduino Due: (D4, D10)
-  - Arduino Zero: (D4, D10)
-  - Arduino Uno or other ATMega328p boards: (D4, D10, D11, D12, D13)
-
-  If you are using an ArduinoEthernet board, the following pins cannot be used (same as Uno):
-  - D4, D10, D11, D12, D13
+  Last updated June 15th, 2016
 */
 
 #include <Servo.h>
 #include <Wire.h>
 #include <Firmata.h>
 
-/*
- * Uncomment the #define SERIAL_DEBUG line below to receive serial output messages relating to your connection
- * that may help in the event of connection issues. If defined, some boards may not begin executing this sketch
- * until the Serial console is opened.
- */
 //#define SERIAL_DEBUG
 #include "utility/firmataDebug.h"
 
-// follow the instructions in ethernetConfig.h to configure your particular hardware
-#include "ethernetConfig.h"
-#include "utility/EthernetClientStream.h"
+/*
+ * Uncomment the following include to enable interfacing
+ * with Serial devices via hardware or software serial.
+ */
+//#include "utility/SerialFirmata.h"
 
-#include "utility/SerialFirmata.h"
+// follow the instructions in bleConfig.h to configure your BLE hardware
+#include "bleConfig.h"
 
-#define I2C_WRITE                   B00000000
-#define I2C_READ                    B00001000
-#define I2C_READ_CONTINUOUSLY       B00010000
-#define I2C_STOP_READING            B00011000
-#define I2C_READ_WRITE_MODE_MASK    B00011000
-#define I2C_10BIT_ADDRESS_MODE_MASK B00100000
-#define I2C_END_TX_MASK             B01000000
+#define I2C_WRITE                   0x00 //B00000000
+#define I2C_READ                    0x08 //B00001000
+#define I2C_READ_CONTINUOUSLY       0x10 //B00010000
+#define I2C_STOP_READING            0x18 //B00011000
+#define I2C_READ_WRITE_MODE_MASK    0x18 //B00011000
+#define I2C_10BIT_ADDRESS_MODE_MASK 0x20 //B00100000
+#define I2C_END_TX_MASK             0x40 //B01000000
 #define I2C_STOP_TX                 1
 #define I2C_RESTART_TX              0
 #define I2C_MAX_QUERIES             8
@@ -93,32 +54,20 @@
 // the minimum interval for sampling analog input
 #define MINIMUM_SAMPLING_INTERVAL   1
 
+// min cannot be < 0x0006. Adjust max if necessary
+#define FIRMATA_BLE_MIN_INTERVAL    0x0006 // 7.5ms (7.5 / 1.25)
+#define FIRMATA_BLE_MAX_INTERVAL    0x0018 // 30ms (30 / 1.25)
+
 /*==============================================================================
  * GLOBAL VARIABLES
  *============================================================================*/
-
-#if defined remote_ip && !defined remote_host
-#ifdef local_ip
-EthernetClientStream stream(client, local_ip, remote_ip, NULL, remote_port);
-#else
-EthernetClientStream stream(client, IPAddress(0, 0, 0, 0), remote_ip, NULL, remote_port);
-#endif
-#endif
-
-#if !defined remote_ip && defined remote_host
-#ifdef local_ip
-EthernetClientStream stream(client, local_ip, IPAddress(0, 0, 0, 0), remote_host, remote_port);
-#else
-EthernetClientStream stream(client, IPAddress(0, 0, 0, 0), IPAddress(0, 0, 0, 0), remote_host, remote_port);
-#endif
-#endif
 
 #ifdef FIRMATA_SERIAL_FEATURE
 SerialFirmata serialFeature;
 #endif
 
 /* analog inputs */
-int analogInputsToReport = 0;      // bitwise array to store pin reporting
+int analogInputsToReport = 0; // bitwise array to store pin reporting
 
 /* digital input ports */
 byte reportPINs[TOTAL_PORTS];       // 1 = report this port, 0 = silence
@@ -130,7 +79,7 @@ byte portConfigInputs[TOTAL_PORTS]; // each bit: 1 = pin in INPUT, 0 = anything 
 /* timer variables */
 unsigned long currentMillis;        // store the current value from millis()
 unsigned long previousMillis;       // for comparison with currentMillis
-unsigned int samplingInterval = 19; // how often to sample analog inputs (in ms)
+unsigned int samplingInterval = 19; // how often to run the main loop (in ms)
 
 /* i2c data */
 struct i2c_device_info {
@@ -140,10 +89,10 @@ struct i2c_device_info {
   byte stopTX;
 };
 
-/* for i2c read continuous mode */
+/* for i2c read continuous more */
 i2c_device_info query[I2C_MAX_QUERIES];
 
-byte i2cRxData[32];
+byte i2cRxData[64];
 boolean isI2CEnabled = false;
 signed char queryIndex = -1;
 // default delay time between i2c read request and Wire.requestFrom()
@@ -268,7 +217,7 @@ void outputPort(byte portNumber, byte portValue, byte forceSend)
 
 /* -----------------------------------------------------------------------------
  * check all the active digital inputs for change of state, then add any events
- * to the Stream output queue using Stream.write() */
+ * to the Serial output queue using Serial.print() */
 void checkDigitalInputs(void)
 {
   /* Using non-looping code allows constants to be given to readPort().
@@ -761,9 +710,6 @@ void systemResetCallback()
 {
   isResetting = true;
 
-  // initialize a defalt state
-  // TODO: option to load config from EEPROM instead of default
-
 #ifdef FIRMATA_SERIAL_FEATURE
   serialFeature.reset();
 #endif
@@ -797,29 +743,12 @@ void systemResetCallback()
   detachedServoCount = 0;
   servoCount = 0;
 
-  /* send digital inputs to set the initial state on the host computer,
-   * since once in the loop(), this firmware will only send on change */
-  /*
-  TODO: this can never execute, since no pins default to digital input
-        but it will be needed when/if we support EEPROM stored config
-  for (byte i=0; i < TOTAL_PORTS; i++) {
-    outputPort(i, readPort(i, portConfigInputs[i]), true);
-  }
-  */
   isResetting = false;
 }
 
 void setup()
 {
   DEBUG_BEGIN(9600);
-
-#ifdef local_ip
-  Ethernet.begin((uint8_t *)mac, local_ip); //start ethernet
-#else
-  Ethernet.begin((uint8_t *)mac);           //start ethernet using dhcp
-#endif
-
-  DEBUG_PRINTLN("connecting...");
 
   Firmata.setFirmwareVersion(FIRMATA_FIRMWARE_MAJOR_VERSION, FIRMATA_FIRMWARE_MINOR_VERSION);
 
@@ -832,28 +761,24 @@ void setup()
   Firmata.attach(START_SYSEX, sysexCallback);
   Firmata.attach(SYSTEM_RESET, systemResetCallback);
 
-#ifdef WIZ5100_ETHERNET
-  // StandardFirmataEthernetPlus communicates with Ethernet shields over SPI. Therefore all
-  // SPI pins must be set to IGNORE. Otherwise Firmata would break SPI communication.
-  // add Pin 10 and configure pin 53 as output if using a MEGA with an Ethernet shield.
+  stream.setLocalName(FIRMATA_BLE_LOCAL_NAME);
 
+  // set the BLE connection interval - this is the fastest interval you can read inputs
+  stream.setConnectionInterval(FIRMATA_BLE_MIN_INTERVAL, FIRMATA_BLE_MAX_INTERVAL);
+  // set how often the BLE TX buffer is flushed (if not full)
+  stream.setFlushInterval(FIRMATA_BLE_MAX_INTERVAL);
+
+#ifdef BLE_REQ
   for (byte i = 0; i < TOTAL_PINS; i++) {
-    if (IS_IGNORE_ETHERNET_SHIELD(i)) {
+    if (IS_IGNORE_BLE_PINS(i)) {
       Firmata.setPinMode(i, PIN_MODE_IGNORE);
     }
   }
-
-  // Arduino Ethernet and Arduino EthernetShield have SD SS wired to D4
-  pinMode(PIN_TO_DIGITAL(4), OUTPUT);    // switch off SD card bypassing Firmata
-  digitalWrite(PIN_TO_DIGITAL(4), HIGH); // SS is active low;
-#endif // WIZ5100_ETHERNET
-
-#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-  pinMode(PIN_TO_DIGITAL(53), OUTPUT); // configure hardware SS as output on MEGA
 #endif
 
-  // start up Network Firmata:
+  stream.begin();
   Firmata.begin(stream);
+
   systemResetCallback();  // reset to default config
 }
 
@@ -864,6 +789,10 @@ void loop()
 {
   byte pin, analogPin;
 
+  // do not process data if no BLE connection is established
+  // poll will send the TX buffer at the specified flush interval or when the buffer is full
+  if (!stream.poll()) return;
+
   /* DIGITALREAD - as fast as possible, check for changes and output them to the
    * Stream buffer using Stream.write()  */
   checkDigitalInputs();
@@ -873,11 +802,9 @@ void loop()
   while (Firmata.available())
     Firmata.processInput();
 
-  // TODO - ensure that Stream buffer doesn't go over 60 bytes
-
   currentMillis = millis();
   if (currentMillis - previousMillis > samplingInterval) {
-    previousMillis += samplingInterval;
+    previousMillis = currentMillis;
     /* ANALOGREAD - do all analogReads() at the configured sampling interval */
     for (pin = 0; pin < TOTAL_PINS; pin++) {
       if (IS_PIN_ANALOG(pin) && Firmata.getPinMode(pin) == PIN_MODE_ANALOG) {
@@ -898,12 +825,4 @@ void loop()
 #ifdef FIRMATA_SERIAL_FEATURE
   serialFeature.update();
 #endif
-
-#if !defined local_ip
-  // only necessary when using DHCP, ensures local IP is updated appropriately if it changes
-  if (Ethernet.maintain()) {
-    stream.maintain(Ethernet.localIP());
-  }
-#endif
-
 }
