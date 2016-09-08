@@ -13,7 +13,7 @@ SoftwareSerial mySerial(-1,3);
 #define NUM_LEDS 1 //How many LEDs are we driving
 
 // Define the pixel address (an integer where 0 addresses all pixels, and 1-255 addresses individual pixels)
-int pixelAddress = 2;
+int pixelAddress = 100;
 
 // Define the array of leds
 CRGB leds[NUM_LEDS];
