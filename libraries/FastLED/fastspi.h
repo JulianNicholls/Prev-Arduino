@@ -1,6 +1,8 @@
 #ifndef __INC_FASTSPI_H
 #define __INC_FASTSPI_H
 
+#include "FastLED.h"
+
 #include "controller.h"
 #include "lib8tion.h"
 
@@ -23,13 +25,21 @@ FASTLED_NAMESPACE_BEGIN
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#if !defined(FASTLED_ALL_PINS_HARDWARE_SPI)
 template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_CLOCK_DIVIDER>
 class SPIOutput : public AVRSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
+#endif
 
 template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_CLOCK_DIVIDER>
 class SoftwareSPIOutput : public AVRSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 
 #ifndef FASTLED_FORCE_SOFTWARE_SPI
+
+#if defined(NRF51) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)
+template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_CLOCK_DIVIDER>
+class SPIOutput : public NRF51SPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
+#endif
+
 #if defined(SPI_DATA) && defined(SPI_CLOCK)
 
 #if defined(FASTLED_TEENSY3) && defined(ARM_HARDWARE_SPI)
@@ -95,8 +105,13 @@ class SPIOutput<SPI_UART1_DATA, SPI_UART1_CLOCK, SPI_SPEED> : public AVRUSART1SP
 #endif
 
 #else
-#warning "No hardware SPI pins defined.  All SPI access will default to bitbanged output"
-
+#  if !defined(FASTLED_INTERNAL) && !defined(FASTLED_ALL_PINS_HARDWARE_SPI)
+#    ifdef FASTLED_HAS_PRAGMA_MESSAGE
+#      pragma message "No hardware SPI pins defined.  All SPI access will default to bitbanged output"
+#    else
+#      warning "No hardware SPI pins defined.  All SPI access will default to bitbanged output"
+#    endif
+#  endif
 #endif
 
 // #if defined(USART_DATA) && defined(USART_CLOCK)
@@ -105,7 +120,13 @@ class SPIOutput<SPI_UART1_DATA, SPI_UART1_CLOCK, SPI_SPEED> : public AVRUSART1SP
 // #endif
 
 #else
-#warning "Forcing software SPI - no hardware SPI for you!"
+#  if !defined(FASTLED_INTERNAL) && !defined(FASTLED_ALL_PINS_HARDWARE_SPI)
+#    ifdef FASTLED_HAS_PRAGMA_MESSAGE
+#      pragma message "Forcing software SPI - no hardware SPI for you!"
+#    else
+#      warning "Forcing software SPI - no hardware SPI for you!"
+#    endif
+#  endif
 #endif
 
 FASTLED_NAMESPACE_END

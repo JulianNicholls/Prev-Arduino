@@ -11,15 +11,11 @@ FASTLED_NAMESPACE_BEGIN
 
 #define TADJUST 0
 #define TOTAL ( (T1+TADJUST) + (T2+TADJUST) + (T3+TADJUST) )
-#define T1_MARK (TOTAL - (T1+TADJUST))
-#define T2_MARK (T1_MARK - (T2+TADJUST))
 
-#define SCALE(S,V) scale8_video(S,V)
-// #define SCALE(S,V) scale8(S,V)
 #define FASTLED_HAS_CLOCKLESS 1
 
 template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 50>
-class ClocklessController : public CLEDController {
+class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 	typedef typename FastPinBB<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPinBB<DATA_PIN>::port_t data_t;
 
@@ -35,37 +31,16 @@ public:
 
 	virtual uint16_t getMaxRefreshRate() const { return 400; }
 
-	virtual void clearLeds(int nLeds) {
-		showColor(CRGB(0, 0, 0), nLeds, 0);
-	}
-
 protected:
 
-	// set all the leds on the controller to a given color
-	virtual void showColor(const struct CRGB & rgbdata, int nLeds, CRGB scale) {
-		PixelController<RGB_ORDER> pixels(rgbdata, nLeds, scale, getDither());
+	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 		mWait.wait();
-		showRGBInternal(pixels);
+		if(!showRGBInternal(pixels)) {
+      sei(); delayMicroseconds(WAIT_TIME); cli();
+      showRGBInternal(pixels);
+    }
 		mWait.mark();
 	}
-
-	virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale) {
-		PixelController<RGB_ORDER> pixels(rgbdata, nLeds, scale, getDither());
-		mWait.wait();
-		showRGBInternal(pixels);
-		mWait.mark();
-	}
-
-#ifdef SUPPORT_ARGB
-	virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale) {
-		PixelController<RGB_ORDER> pixels(rgbdata, nLeds, scale, getDither());
-		mWait.wait();
-		showRGBInternal(pixels);
-		sei();
-		mWait.mark();
-	}
-#endif
-
 
 	template<int BITS>  __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register data_ptr_t port, register uint8_t & b) {
 		// Make sure we don't slot into a wrapping spot, this will delay up to 12.5µs for WS2812
@@ -95,7 +70,7 @@ protected:
 #define FORCE_REFERENCE(var)  asm volatile( "" : : "r" (var) )
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
 	// gcc will use register Y for the this pointer.
-	static uint32_t showRGBInternal(PixelController<RGB_ORDER> & pixels) {
+	static uint32_t showRGBInternal(PixelController<RGB_ORDER> pixels) {
 		// Setup and start the clock
 		TC_Configure(DUE_TIMER,DUE_TIMER_CHANNEL,TC_CMR_TCCLKS_TIMER_CLOCK1);
 		pmc_enable_periph_clk(DUE_TIMER_ID);
@@ -106,7 +81,7 @@ protected:
 
 		// Setup the pixel controller and load/scale the first byte
 		pixels.preStepFirstByteDithering();
-		register uint8_t b = pixels.loadAndScale0();
+		uint8_t b = pixels.loadAndScale0();
 
 		uint32_t next_mark = (DUE_TIMER_VAL + (TOTAL));
 		while(pixels.has(1)) {
@@ -115,7 +90,7 @@ protected:
 			#if (FASTLED_ALLOW_INTERRUPTS == 1)
 			cli();
 			if(DUE_TIMER_VAL > next_mark) {
-				if((DUE_TIMER_VAL - next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) { sei(); TC_Stop(DUE_TIMER,DUE_TIMER_CHANNEL); return DUE_TIMER_VAL; }
+				if((DUE_TIMER_VAL - next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) { sei(); TC_Stop(DUE_TIMER,DUE_TIMER_CHANNEL); return 0; }
 			}
 			#endif
 

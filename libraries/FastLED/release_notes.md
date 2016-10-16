@@ -1,3 +1,30 @@
+FastLED3.1.3
+===============
+
+* Add SK6822 timings
+* Add ESP8266 support - note, only tested w/the arduino esp8266 build environment 
+* Improvements to hsv2rgb, palette, and noise performance
+* Improvements to rgb2hsv accuracy
+* Fixed noise discontinuity 
+* Add wino board support
+* Fix scale8 (so now, scale8(255,255) == 255, not 254!)
+* Add ESP8266 parallel output support 
+
+
+FastLED3.1.1
+============
+* Enabled RFDuino/nrf51822 hardware SPI support
+* Fix edge case bug w/HSV palette blending 
+* Fix power management issue w/parallel output
+* Use static_asserts for some more useful compile time errors around bad pins
+* Roll power management into FastLED.show/delay directly
+* Support for adafruit pixies on arduino type platforms that have SoftwareSerial
+  * TODO: support hardware serial on platforms that have it available
+* Add UCS2903 timings
+* Preliminary CPixelView/CRGBSet code - more flexible treatment of groups of arrays 
+  * https://github.com/FastLED/FastLED/wiki/RGBSet-Reference
+
+
 FastLED3.1.0
 ============
 * Added support for the following platforms

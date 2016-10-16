@@ -8,7 +8,7 @@ FASTLED_NAMESPACE_BEGIN
 #define FASTLED_HAS_CLOCKLESS 1
 
 template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 50>
-class ClocklessController : public CLEDController {
+class ClocklessController : public CPixelLEDController<RGB_ORDER> {
   typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
   typedef typename FastPin<DATA_PIN>::port_t data_t;
 
@@ -24,37 +24,16 @@ public:
 
 	virtual uint16_t getMaxRefreshRate() const { return 400; }
 
-  virtual void clearLeds(int nLeds) {
-    showColor(CRGB(0, 0, 0), nLeds, 0);
-  }
-
 protected:
 
-  // set all the leds on the controller to a given color
-  virtual void showColor(const struct CRGB & rgbdata, int nLeds, CRGB scale) {
-    PixelController<RGB_ORDER> pixels(rgbdata, nLeds, scale, getDither());
-
+  virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
     mWait.wait();
-    showRGBInternal(pixels);
+    if(!showRGBInternal(pixels)) {
+      sei(); delayMicroseconds(WAIT_TIME); cli();
+      showRGBInternal(pixels);
+    }
     mWait.mark();
   }
-
-  virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale) {
-    PixelController<RGB_ORDER> pixels(rgbdata, nLeds, scale, getDither());
-
-    mWait.wait();
-    showRGBInternal(pixels);
-    mWait.mark();
-  }
-
-  #ifdef SUPPORT_ARGB
-  virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale) {
-    PixelController<RGB_ORDER> pixels(rgbdata, nLeds, scale, getDither());
-    mWait.wait();
-    showRGBInternal(pixels);
-    mWait.mark();
-  }
-  #endif
 
 #define _CYCCNT (*(volatile uint32_t*)(0xE0001004UL))
 
@@ -88,7 +67,7 @@ protected:
 
   // This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
   // gcc will use register Y for the this pointer.
-  static uint32_t showRGBInternal(PixelController<RGB_ORDER> & pixels) {
+  static uint32_t showRGBInternal(PixelController<RGB_ORDER> pixels) {
     // Get access to the clock
     CoreDebug->DEMCR  |= CoreDebug_DEMCR_TRCENA_Msk;
     DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
@@ -114,7 +93,7 @@ protected:
       cli();
       // if interrupts took longer than 45µs, punt on the current frame
       if(DWT->CYCCNT > next_mark) {
-        if((DWT->CYCCNT-next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) { sei(); return DWT->CYCCNT; }
+        if((DWT->CYCCNT-next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) { sei(); return 0; }
       }
 
       hi = *port | FastPin<DATA_PIN>::mask();
