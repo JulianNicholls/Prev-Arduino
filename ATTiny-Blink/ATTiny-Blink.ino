@@ -28,19 +28,6 @@ void loop() {
     for(int pin = 0; pin < 5; ++pin)
       digitalWrite(pin, (pin == set) ? HIGH : LOW);
       
-    delay(400);              // wait for a while
+    delay(300);              // wait for a while
   }
-
-
-//  digitalWrite(led_pin0, LOW);    // turn the LED off by making the voltage LOW
-//  digitalWrite(led_pin1, HIGH);   // turn the LED on (HIGH is the voltage level)
-//  digitalWrite(led_pin2, LOW);    // turn the LED off by making the voltage LOW
-//  delay(400);              // wait for a second
-//
-//  digitalWrite(led_pin0, LOW);    // turn the LED off by making the voltage LOW
-//  digitalWrite(led_pin1, LOW);    // turn the LED off by making the voltage LOW
-//  digitalWrite(led_pin2, HIGH);   // turn the LED on (HIGH is the voltage level)
-//  delay(400);              // wait for a second
-//  digitalWrite(led_pin, LOW);    // turn the LED off by making the voltage LOW
-//  delay(800);              // wait for a second
 }
