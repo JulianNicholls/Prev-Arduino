@@ -1,0 +1,23 @@
+{
+  "name": "temp-server",
+  "version": "0.0.1",
+  "description": "Temperature Server for dual temperature monitor",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JulianNicholls/Arduino.git"
+  },
+  "keywords": [
+    "Arduino",
+    "Temperature"
+  ],
+  "author": "Julian Nicholls",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JulianNicholls/Arduino/issues"
+  },
+  "homepage": "https://github.com/JulianNicholls/Arduino#readme"
+}
