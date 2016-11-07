@@ -20,6 +20,14 @@ MFRC522::MFRC522() {
  * Constructor.
  * Prepares the output pins.
  */
+MFRC522::MFRC522(	byte resetPowerDownPin	///< Arduino pin connected to MFRC522's reset and power down input (Pin 6, NRSTPD, active low)
+				): MFRC522(SS, resetPowerDownPin) { // SS is defined in pins_arduino.h
+} // End constructor
+
+/**
+ * Constructor.
+ * Prepares the output pins.
+ */
 MFRC522::MFRC522(	byte chipSelectPin,		///< Arduino pin connected to MFRC522's SPI slave select input (Pin 24, NSS, active low)
 					byte resetPowerDownPin	///< Arduino pin connected to MFRC522's reset and power down input (Pin 6, NRSTPD, active low)
 				) {
@@ -215,6 +223,14 @@ void MFRC522::PCD_Init() {
 	PCD_WriteRegister(TxASKReg, 0x40);		// Default 0x00. Force a 100 % ASK modulation independent of the ModGsPReg register setting
 	PCD_WriteRegister(ModeReg, 0x3D);		// Default 0x3F. Set the preset value for the CRC coprocessor for the CalcCRC command to 0x6363 (ISO 14443-3 part 6.2.4)
 	PCD_AntennaOn();						// Enable the antenna driver pins TX1 and TX2 (they were disabled by the reset)
+} // End PCD_Init()
+
+/**
+ * Initializes the MFRC522 chip.
+ */
+void MFRC522::PCD_Init(	byte resetPowerDownPin	///< Arduino pin connected to MFRC522's reset and power down input (Pin 6, NRSTPD, active low)
+					) {
+	PCD_Init(SS, resetPowerDownPin); // SS is defined in pins_arduino.h
 } // End PCD_Init()
 
 /**
@@ -698,7 +714,7 @@ MFRC522::StatusCode MFRC522::PICC_Select(	Uid *uid,			///< Pointer to Uid struct
 				if (valueOfCollReg & 0x20) { // CollPosNotValid
 					return STATUS_COLLISION; // Without a valid collision position we cannot continue
 				}
-				byte collisionPos = result & 0x1F; // Values 0-31, 0 means bit 32.
+				byte collisionPos = valueOfCollReg & 0x1F; // Values 0-31, 0 means bit 32.
 				if (collisionPos == 0) {
 					collisionPos = 32;
 				}
@@ -1301,23 +1317,11 @@ void MFRC522::PICC_DumpToSerial(Uid *uid	///< Pointer to Uid struct returned fro
 								) {
 	MIFARE_Key key;
 	
-	// UID
-	Serial.print(F("Card UID:"));
-	for (byte i = 0; i < uid->size; i++) {
-		if(uid->uidByte[i] < 0x10)
-			Serial.print(F(" 0"));
-		else
-			Serial.print(F(" "));
-		Serial.print(uid->uidByte[i], HEX);
-	} 
-	Serial.println();
-	
-	// PICC type
-	PICC_Type piccType = PICC_GetType(uid->sak);
-	Serial.print(F("PICC type: "));
-	Serial.println(PICC_GetTypeName(piccType));
+	// Dump UID, SAK and Type
+	PICC_DumpDetailsToSerial(uid);
 	
 	// Dump contents
+	PICC_Type piccType = PICC_GetType(uid->sak);
 	switch (piccType) {
 		case PICC_TYPE_MIFARE_MINI:
 		case PICC_TYPE_MIFARE_1K:
@@ -1349,6 +1353,34 @@ void MFRC522::PICC_DumpToSerial(Uid *uid	///< Pointer to Uid struct returned fro
 	Serial.println();
 	PICC_HaltA(); // Already done if it was a MIFARE Classic PICC.
 } // End PICC_DumpToSerial()
+
+/**
+ * Dumps card info (UID,SAK,Type) about the selected PICC to Serial.
+ */
+void MFRC522::PICC_DumpDetailsToSerial(Uid *uid	///< Pointer to Uid struct returned from a successful PICC_Select().
+									) {
+	// UID
+	Serial.print(F("Card UID:"));
+	for (byte i = 0; i < uid->size; i++) {
+		if(uid->uidByte[i] < 0x10)
+			Serial.print(F(" 0"));
+		else
+			Serial.print(F(" "));
+		Serial.print(uid->uidByte[i], HEX);
+	} 
+	Serial.println();
+	
+	// SAK
+	Serial.print(F("Card SAK: "));
+	if(uid->sak < 0x10)
+		Serial.print(F("0"));
+	Serial.println(uid->sak, HEX);
+	
+	// (suggested) PICC type
+	PICC_Type piccType = PICC_GetType(uid->sak);
+	Serial.print(F("PICC type: "));
+	Serial.println(PICC_GetTypeName(piccType));
+} // End PICC_DumpDetailsToSerial()
 
 /**
  * Dumps memory contents of a MIFARE Classic PICC.

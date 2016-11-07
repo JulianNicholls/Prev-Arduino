@@ -10,39 +10,110 @@ Read and write different types of Radio-Frequency IDentification (RFID) cards
 on your Arduino using a RC522 based reader connected via the Serial Peripheral
 Interface (SPI) interface.
 
-Set the UID, write to sector 0, and unbrick Chinese UID changeable MIFARE cards.
+
+.. _development:
+Development
+----------
+**The development by owner miguelbalboa has ended**. Further development will be done by community. This library is still maintained by miguelbalboa, so make pull request if you like some new features or fixes. Support/issues should be solved by community.
+
+
+.. _what works and not:
+What works and not?
+----------
+
+* **Works**
+  
+  #. Communication (Crypto1) with MIFARE Classic (1k, 4k, Mini).
+  #. Communication (Crypto1) with MIFARE Classic compatible PICCs.
+  #. Firmware self check of MFRC522.
+  #. Set the UID, write to sector 0, and unbrick Chinese UID changeable MIFARE cards.
+
+* **Partial**
+
+  #. Communication with MIFARE Ultralight.
+  #. Other PICCs (Ntag216).
+
+* **Works not**
+  
+  #. MIFARE DESFire, MIFARE DESFire EV1/EV2, not supported by software.
+  #. Communication with 3DES or AES, not supported by software.
+  #. Peer-to-peer (ISO/IEC 18092), not `supported by hardware`_.
+  #. Communication with smart phone, not `supported by hardware`_.
+  #. Card emulation, not `supported by hardware`_.
+  #. Use of IRQ pin. But there is a proof-of-concept example.
+
+* **Need more?**
+
+  #. If software: code it and make a pull request.
+  #. If hardware: buy a more expensive like PN532 (supports NFC and many more, but costs about $15).
+
+
+.. _compatible ide:
+Compatible IDE
+----------
+This library works with Arduino IDE 1.6, older versions are **not supported** and will cause compile errors. The built-in library manager is supported.
+
+If you use your own compiler, you have to enable ``c++11``-support.
+
+
+.. _compatible boards:
+Compatible boards
+----------
+
+**!!!Only for advanced user!!!**
+
+This library is compatible to Teensy and ESP8266, if you use board plugin of the Arduino IDE. Not all examples are available for every board. You also have to change pins, see `pin layout`_.
+
+Some user made some patches/suggestions/ports for other boards:
+
+* Linux: https://github.com/miguelbalboa/rfid/pull/216
+* chipKIT: https://github.com/miguelbalboa/rfid/pull/230
+* ESP8266 (native): https://github.com/miguelbalboa/rfid/pull/235
+
+Note that the main target/support of library is still Arduino.
+
+.. _support issue:
+Support/issue
+----------
+1. First checkout `what works and not`_ and `troubleshooting`_ .
+
+2. It seems to be a hardware issue or you need support to program your project?
+    Please ask in the official `Arduino forum`_, there you would get a much faster answer then on github.
+
+3. It seems to be a software issue?
+    Open an issue on github.
 
 
 .. _pin layout:
-
 Pin Layout
 ----------
 
 The following table shows the typical pin layout used:
 
-+-----------+----------+-------------------------------------------------------------+--------------------------+
-|           | PCD      | Arduino                                                     | Teensy                   |
-|           +----------+-------------+---------+---------+---------------+-----------+--------+--------+--------+
-|           | MFRC522  | Uno         | Mega    | Nano v3 |Leonardo/Micro | Pro Micro | 2.0    | ++ 2.0 | 3.1    |
-+-----------+----------+-------------+---------+---------+---------------+-----------+--------+--------+--------+
-| Signal    | Pin      | Pin         | Pin     | Pin     | Pin           | Pin       | Pin    | Pin    | Pin    |
-+===========+==========+=============+=========+=========+===============+===========+========+========+========+
-| RST/Reset | RST      | 9 [1]_      | 5 [1]_  | D9      | RESET/ICSP-5  | RST       | 7      | 4      | 9      |
-+-----------+----------+-------------+---------+---------+---------------+-----------+--------+--------+--------+
-| SPI SS    | SDA [3]_ | 10 [2]_     | 53 [2]_ | D10     | 10            | 10        | 0      | 20     | 10     |
-+-----------+----------+-------------+---------+---------+---------------+-----------+--------+--------+--------+
-| SPI MOSI  | MOSI     | 11 / ICSP-4 | 51      | D11     | ICSP-4        | 16        | 2      | 22     | 11     |
-+-----------+----------+-------------+---------+---------+---------------+-----------+--------+--------+--------+
-| SPI MISO  | MISO     | 12 / ICSP-1 | 50      | D12     | ICSP-1        | 14        | 3      | 23     | 12     |
-+-----------+----------+-------------+---------+---------+---------------+-----------+--------+--------+--------+
-| SPI SCK   | SCK      | 13 / ICSP-3 | 52      | D13     | ICSP-3        | 15        | 1      | 21     | 13     |
-+-----------+----------+-------------+---------+---------+---------------+-----------+--------+--------+--------+
++-----------+----------+---------------------------------------------------------------+--------------------------+
+|           | PCD      | Arduino                                                       | Teensy                   |
+|           +----------+-------------+---------+---------+-----------------+-----------+--------+--------+--------+
+|           | MFRC522  | Uno / 101   | Mega    | Nano v3 |Leonardo / Micro | Pro Micro | 2.0    | ++ 2.0 | 3.1    |
++-----------+----------+-------------+---------+---------+-----------------+-----------+--------+--------+--------+
+| Signal    | Pin      | Pin         | Pin     | Pin     | Pin             | Pin       | Pin    | Pin    | Pin    |
++===========+==========+=============+=========+=========+=================+===========+========+========+========+
+| RST/Reset | RST      | 9 [1]_      | 5 [1]_  | D9      | RESET / ICSP-5  | RST       | 7      | 4      | 9      |
++-----------+----------+-------------+---------+---------+-----------------+-----------+--------+--------+--------+
+| SPI SS    | SDA [3]_ | 10 [2]_     | 53 [2]_ | D10     | 10              | 10        | 0      | 20     | 10     |
++-----------+----------+-------------+---------+---------+-----------------+-----------+--------+--------+--------+
+| SPI MOSI  | MOSI     | 11 / ICSP-4 | 51      | D11     | ICSP-4          | 16        | 2      | 22     | 11     |
++-----------+----------+-------------+---------+---------+-----------------+-----------+--------+--------+--------+
+| SPI MISO  | MISO     | 12 / ICSP-1 | 50      | D12     | ICSP-1          | 14        | 3      | 23     | 12     |
++-----------+----------+-------------+---------+---------+-----------------+-----------+--------+--------+--------+
+| SPI SCK   | SCK      | 13 / ICSP-3 | 52      | D13     | ICSP-3          | 15        | 1      | 21     | 13     |
++-----------+----------+-------------+---------+---------+-----------------+-----------+--------+--------+--------+
 
 .. [1] Configurable, typically defined as RST_PIN in sketch/program.
 .. [2] Configurable, typically defined as SS_PIN in sketch/program.
 .. [3] The SDA pin might be labeled SS on some/older MFRC522 boards. 
 
 
+.. _hardware:
 Hardware
 --------
 
@@ -100,7 +171,8 @@ Protocols
 Security
 -------
 This library only supports crypto1-encrypted communication. Crypto1 has been known as `broken`_ for a few years, so it does NOT offer ANY security, it is virtually unencrypted communication. **Do not use it for any security related applications!**
-This library does not offer 3DES or AES authentication used by cars like the Mifare DESFire, it may be possible to be implemented because the datasheet says there is support. We hope for pull requests :).
+
+This library does not offer 3DES or AES authentication used by cards like the Mifare DESFire, it may be possible to be implemented because the datasheet says there is support. We hope for pull requests :).
 
 
 .. _troubleshooting:
@@ -133,6 +205,7 @@ Troubleshooting
   #. Hardware may be corrupted, most products are from china and sometimes the quality is really poor. Contact your seller.
   #. Newer versions of Mifare cards like DESFire/Ultralight maybe not work according to missing authentification, see `security`_ or different `protocol`_.
 
+
 * **My mobile phone doesn't recognize the MFRC522** or **my MFRC522 can't read data from other MFRC522**
 
   #. Card simmulation is not supported.
@@ -146,6 +219,7 @@ Troubleshooting
   #. If hardware: buy a more expensive like PN532 (supports NFC and many more, but costs about $15)
 
 
+.. _license:
 License
 -------
 This is free and unencumbered software released into the public domain.
@@ -171,7 +245,7 @@ OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-For more information, please refer to http://unlicense.org/
+For more information, please refer to https://unlicense.org/
 
 
 History
@@ -188,8 +262,10 @@ It has been extended with functionality to alter sector 0 on Chinese UID changea
 
 
 .. _arduino: https://arduino.cc/
-.. _ebay: http://www.ebay.com/
+.. _ebay: https://www.ebay.com/
 .. _iso/iec 14443a: https://en.wikipedia.org/wiki/ISO/IEC_14443
 .. _iso/iec 14443-3\:2011 part 3: 
-.. _nxp mfrc522: http://www.nxp.com/documents/data_sheet/MFRC522.pdf
-.. _broken: http://eprint.iacr.org/2008/166
+.. _nxp mfrc522: https://www.nxp.com/documents/data_sheet/MFRC522.pdf
+.. _broken: https://eprint.iacr.org/2008/166
+.. _supported by hardware: https://web.archive.org/web/20151210045625/http://www.nxp.com/documents/leaflet/939775017564.pdf
+.. _Arduino forum: https://forum.arduino.cc
