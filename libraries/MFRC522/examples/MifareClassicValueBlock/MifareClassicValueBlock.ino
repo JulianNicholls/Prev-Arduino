@@ -98,7 +98,7 @@ void loop() {
     MFRC522::StatusCode status;
     byte buffer[18];
     byte size = sizeof(buffer);
-    long value;
+    int32_t value;
 
     // Authenticate using key A
     Serial.println(F("Authenticating using key A..."));
@@ -166,8 +166,8 @@ void loop() {
     // Check if it matches the desired access pattern already;
     // because if it does, we don't need to write it again...
     if (    buffer[6] != trailerBuffer[6]
-        &&  buffer[7] != trailerBuffer[7]
-        &&  buffer[8] != trailerBuffer[8]) {
+        ||  buffer[7] != trailerBuffer[7]
+        ||  buffer[8] != trailerBuffer[8]) {
         // They don't match (yet), so write it to the PICC
         Serial.println(F("Writing new sector trailer..."));
         status = mfrc522.MIFARE_Write(trailerBlock, trailerBuffer, 16);
