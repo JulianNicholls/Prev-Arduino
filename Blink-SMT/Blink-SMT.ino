@@ -43,37 +43,37 @@ void setup() {
 }
 
 void loop() { 
-  // Turn the LED on, then pause
+  // Turn the LED on in various colours, then pause
 
   leds[0] = CRGB::Red;
   FastLED.show();
-  delay(500);
+  delay(1000);
 
   leds[0] = CRGB::Yellow;
   FastLED.show();
-  delay(500);
+  delay(1000);
 
   leds[0] = CRGB::Green;
   FastLED.show();
-  delay(500);
+  delay(1000);
 
   leds[0] = CRGB::Cyan;
   FastLED.show();
-  delay(500);
+  delay(1000);
 
   leds[0] = CRGB::Blue;
   FastLED.show();
-  delay(500);
+  delay(1000);
 
   leds[0] = CRGB::Magenta;
   FastLED.show();
-  delay(500);
+  delay(1000);
 
   leds[0] = CRGB::White;
   FastLED.show();
-  delay(500);
+  delay(1000);
 
-  // Now turn the LED off, then pause
+  // Now turn the LED off, then pause a little longer
   leds[0] = CRGB::Black;
   FastLED.show();
   delay(800);

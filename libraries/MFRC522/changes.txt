@@ -1,7 +1,41 @@
 -- Add changes to unreleased tag until we make a release.
 
 unreleased
-- tba
+-
+
+22 Mar 2017, v1.3.6
+- Added deprecate and compiler warnings @Rotzbua
+
+8 Apr 2017, v1.3.5
+- Updated "AccessControl.ino", bugs fixed and alterate Wipe button polling method without using other library @beyondszine reviewed by @omersiar 
+- Updated README notice about port for esp8266 @mmmmar
+
+7 Apr 2017, v1.3.4
+- Added new example "rfid_read_personal_data.ino" @ryand1011
+- Updated example "rfid_write_personal_data.ino" code style to Arduino IDE @Rotzbua
+- Removed (temp.) Teensy from travis build script because fails @Rotzbua
+
+26 Mar 2017, v1.3.3
+- Fixed bugs in MFRC522Extended, now should work with Desfire.h from JPG-Consulting @Rotzbua
+- Fixed UINT8_MAX error @Rotzbua
+
+15 Mar 2017, v1.3.2
+- Added ESP8266 to library.properties
+
+15 Mar 2017, v1.3.1
+- Fixed compiler warning in MFRC522Extended @Rotzbua
+- Removed unused function @Rotzbua
+
+13 Mar 2017, v1.3.0
+- Warning: Source has moved to folder src!
+- Added addtional class to support ISO/IEC 14443-4 PICCs @JPG-Consulting
+- Added RATS (Request for Answer To Select) @JPG-Consulting
+- More information see https://github.com/miguelbalboa/rfid/pull/271 @JPG-Consulting
+
+13 Mar 2017, v1.2.1
+- Removed need for reset pin #275 @tkoester
+- Added SPI speed option + Various minor changes #276 @tuyethoa08041997
+- Updated documentation, travis build script and small code change @Rotzbua
 
 3 Jan 2017, v1.2.0
 - Warning: This version introduce usage of stdint.h, usage of not well defined int types are abandoned.

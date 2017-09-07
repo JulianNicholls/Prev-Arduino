@@ -209,8 +209,8 @@ uint8_t u8g2_GetFontBBXHeight(u8g2_t *u8g2)
   return u8g2->font_info.max_char_height;		/* new font info structure */
 }
 
-int8_t u8g_GetFontBBXOffX(u8g2_t *u8g2) U8G2_NOINLINE;
-int8_t u8g_GetFontBBXOffX(u8g2_t *u8g2)
+int8_t u8g2_GetFontBBXOffX(u8g2_t *u8g2) U8G2_NOINLINE;
+int8_t u8g2_GetFontBBXOffX(u8g2_t *u8g2)
 {
   return u8g2->font_info.x_offset;		/* new font info structure */
 }
@@ -990,7 +990,7 @@ void u8g2_SetFont(u8g2_t *u8g2, const uint8_t  *font)
     u8g2->font = font;
     u8g2_read_font_info(&(u8g2->font_info), font);
     u8g2_UpdateRefHeight(u8g2);
-    u8g2_SetFontPosBaseline(u8g2);
+    /* u8g2_SetFontPosBaseline(u8g2); */ /* removed with issue 195 */
   }
 }
 
