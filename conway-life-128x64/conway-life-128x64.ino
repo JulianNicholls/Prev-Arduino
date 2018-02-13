@@ -1,6 +1,8 @@
 #include "U8glib.h"
 
-U8GLIB_ST7920_128X64_1X u8g(10);    // Hardware SPI, 10 = CS/CE, 11 = MOSI, 13 = SCK
+U8GLIB_SSD1306_128X64 u8g(U8G_I2C_OPT_NONE|U8G_I2C_OPT_DEV_0);  // I2C / TWI 
+
+// U8GLIB_ST7920_128X64_1X u8g(10);    // Hardware SPI, 10 = CS/CE, 11 = MOSI, 13 = SCK
 
 const int cols  = 128 / 2;  // 2 -> 64, 3 -> 42
 const int rows  = 64 / 2;   // 2 -> 32, 3 -> 21
@@ -82,7 +84,7 @@ void setup()
   }
 
   for(i = 0; i < num_alive_cells; ++i) {
-    set_state(cur->y, cur->x, 1);
+    set_state(cur->y, cur->x);
     ++cur;
   }  
 
@@ -163,14 +165,12 @@ boolean state(int row, int col) {
   return grid[row][cbyte] & cmask;
 }
 
-void set_state(int row, int col, boolean state) {
+// Set a cell as on
+void set_state(int row, int col) {
   int cbyte = col >> 3;
   int cmask = 1 << (col & 7);
 
-  if(state)
-    grid[row][cbyte] |= cmask;
-  else
-    grid[row][cbyte] &= cmask;
+  grid[row][cbyte] |= cmask;
 }
 
 void set_new_state(int row, int col, boolean state) {
