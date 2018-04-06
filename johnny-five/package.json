@@ -10,6 +10,7 @@
   "author": "Julian Nicholls <juliannicholls29@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "johnny-five": "^0.14.3"
+    "johnny-five": "^0.14.3",
+    "oled-js": "^4.0.5"
   }
 }
