@@ -98,6 +98,7 @@ u8g2_font_freedoomr10_tu	LITERAL1
 u8g2_font_freedoomr10_mu	LITERAL1
 u8g2_font_freedoomr25_tn	LITERAL1
 u8g2_font_freedoomr25_mn	LITERAL1
+u8g2_font_7Segments_26x42_mn	LITERAL1
 u8g2_font_amstrad_cpc_extended_8f	LITERAL1
 u8g2_font_amstrad_cpc_extended_8r	LITERAL1
 u8g2_font_amstrad_cpc_extended_8n	LITERAL1
@@ -155,6 +156,7 @@ u8g2_font_6x12_mn	LITERAL1
 u8g2_font_6x12_me	LITERAL1
 u8g2_font_6x12_t_symbols	LITERAL1
 u8g2_font_6x12_m_symbols	LITERAL1
+u8g2_font_6x12_t_cyrillic	LITERAL1
 u8g2_font_6x13_tf	LITERAL1
 u8g2_font_6x13_tr	LITERAL1
 u8g2_font_6x13_tn	LITERAL1
@@ -769,6 +771,8 @@ u8g2_font_unifont_t_japanese2	LITERAL1
 u8g2_font_unifont_t_japanese3	LITERAL1
 u8g2_font_unifont_t_korean1	LITERAL1
 u8g2_font_unifont_t_korean2	LITERAL1
+u8g2_font_unifont_t_vietnamese1	LITERAL1
+u8g2_font_unifont_t_vietnamese2	LITERAL1
 u8g2_font_gb16st_t_1	LITERAL1
 u8g2_font_gb16st_t_2	LITERAL1
 u8g2_font_gb16st_t_3	LITERAL1
@@ -1068,6 +1072,21 @@ u8g2_font_trixel_square_tn	LITERAL1
 u8g2_font_haxrcorp4089_tr	LITERAL1
 u8g2_font_haxrcorp4089_tn	LITERAL1
 u8g2_font_haxrcorp4089_t_cyrillic	LITERAL1
+u8g2_font_bubble_tr	LITERAL1
+u8g2_font_bubble_tn	LITERAL1
+u8g2_font_cardimon_pixel_tf	LITERAL1
+u8g2_font_cardimon_pixel_tr	LITERAL1
+u8g2_font_cardimon_pixel_tn	LITERAL1
+u8g2_font_maniac_tf	LITERAL1
+u8g2_font_maniac_tr	LITERAL1
+u8g2_font_maniac_tn	LITERAL1
+u8g2_font_maniac_te	LITERAL1
+u8g2_font_lucasarts_scumm_subtitle_o_tf	LITERAL1
+u8g2_font_lucasarts_scumm_subtitle_o_tr	LITERAL1
+u8g2_font_lucasarts_scumm_subtitle_o_tn	LITERAL1
+u8g2_font_lucasarts_scumm_subtitle_r_tf	LITERAL1
+u8g2_font_lucasarts_scumm_subtitle_r_tr	LITERAL1
+u8g2_font_lucasarts_scumm_subtitle_r_tn	LITERAL1
 u8g2_font_fub11_tf	LITERAL1
 u8g2_font_fub11_tr	LITERAL1
 u8g2_font_fub11_tn	LITERAL1
