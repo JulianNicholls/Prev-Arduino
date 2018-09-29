@@ -32,7 +32,7 @@ void loop() {
   if (diff > 5) {                     // Take out the judder
     myservo.write(angle);             // Set the servo position
     delay(diff * 2);                  // Wait for the servo to get there
-    prev_angle = angle;
+    prev_angle = (prev_angle + angle) / 2;
   }
   
   delay(50);

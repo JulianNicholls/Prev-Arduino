@@ -3,48 +3,70 @@
 
 #include <Servo.h>
 
-const short LEFT_EYE = 4;
-const short RIGHT_EYE = 5;
+const short LEFT_EYE = 6;
+const short RIGHT_EYE = 7;
 
-Servo myservo;  // create servo object to control a servo
+Servo left, right, swivel;
 
 int led1 = HIGH;
 
 void setup() {
-  myservo.attach(9);  // attaches the servo on pin 9 to the servo object
+  left.attach(9);  // attaches the servo on pin 9 to the servo object
+  right.attach(10);  // attaches the servo on pin 9 to the servo object
+  swivel.attach(11);  // attaches the servo on pin 9 to the servo object
 
-  myservo.write(120);
+  left.write(175);
+  right.write(5);
+  swivel.write(90);
 
   pinMode(LEFT_EYE, OUTPUT);
   pinMode(RIGHT_EYE, OUTPUT);
 
-  flicker();
+//  flicker();
 }
 
 void loop() {
-  int this_time = random(60);
-  
-  if (this_time >= 48)   // Blink 12 times a minute 
-    blink();
-
-  if (this_time == 5 || this_time == 6)   // Major malfunction a couple of times a minute
-    flicker();
-  
-  if (this_time < 10)    // Minor malfunction 10 times a minute 
-    eyes_random(200);
-
-  digitalWrite(LEFT_EYE, HIGH);     // Light up both eyes
-  digitalWrite(RIGHT_EYE, HIGH);
-
+  blink();
   delay(1000);
+
+  swivel.write(120);
+  delay(500);
+  swivel.write(60);
+  delay(500);
+  swivel.write(90);
+  
+  digitalWrite(LEFT_EYE, HIGH);
+  digitalWrite(RIGHT_EYE, LOW);
+  delay(1000);
+
+  digitalWrite(LEFT_EYE, LOW);
+  digitalWrite(RIGHT_EYE, HIGH);
+  delay(1000);
+
+//  int this_time = random(60);
+//  
+//  if (this_time >= 48)   // Blink 12 times a minute 
+//    blink();
+//
+//  if (this_time == 5 || this_time == 6)   // Major malfunction a couple of times a minute
+//    flicker();
+//  
+//  if (this_time < 10)    // Minor malfunction 10 times a minute 
+//    eyes_random(200);
+//
+//  digitalWrite(LEFT_EYE, HIGH);     // Light up both eyes
+//  digitalWrite(RIGHT_EYE, HIGH);
+//
+//  delay(1000);
 }
 
 void blink() {
-  myservo.write(60);
+  left.write(115);
+  right.write(65);
   delay(300);     // Humans blink for 300-400ms
 
-  myservo.write(120);
-//  delay(500);
+  left.write(175);
+  right.write(5);
 }
 
 /**** FLICKER SEQUENCE ****
