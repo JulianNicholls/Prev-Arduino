@@ -3,21 +3,29 @@
 
 #include <Servo.h>
 
-const short LEFT_EYE = 6;
-const short RIGHT_EYE = 7;
+const short RIGHT_EYE = 6;
+const short LEFT_EYE = 7;
+
+const short LEFT_REST = 120;
+const short RIGHT_REST = 60;
+const short SWIVEL_REST = 105;
 
 Servo left, right, swivel;
 
 int led1 = HIGH;
 
 void setup() {
-  left.attach(9);  // attaches the servo on pin 9 to the servo object
-  right.attach(10);  // attaches the servo on pin 9 to the servo object
-  swivel.attach(11);  // attaches the servo on pin 9 to the servo object
+  right.attach(9);  // attaches the servo on pin 9 to the servo object
+  left.attach(10);  // attaches the servo on pin 10 to the servo object
+  swivel.attach(11);  // attaches the servo on pin 11 to the servo object
 
-  left.write(175);
-  right.write(5);
-  swivel.write(90);
+  left.write(LEFT_REST);
+  right.write(RIGHT_REST);
+
+//  left.write(RIGHT_REST);
+//  right.write(LEFT_REST);
+
+  swivel.write(SWIVEL_REST);
 
   pinMode(LEFT_EYE, OUTPUT);
   pinMode(RIGHT_EYE, OUTPUT);
@@ -26,23 +34,30 @@ void setup() {
 }
 
 void loop() {
-  blink();
-  delay(1000);
 
-  swivel.write(120);
-  delay(500);
-  swivel.write(60);
-  delay(500);
-  swivel.write(90);
+//  return;
+
   
-  digitalWrite(LEFT_EYE, HIGH);
-  digitalWrite(RIGHT_EYE, LOW);
-  delay(1000);
+//  blink();
+//  delay(1000);
 
-  digitalWrite(LEFT_EYE, LOW);
-  digitalWrite(RIGHT_EYE, HIGH);
+  swivel.write(SWIVEL_REST + 10);
   delay(1000);
-
+  swivel.write(SWIVEL_REST - 10);
+  delay(1000);
+  swivel.write(SWIVEL_REST);
+  delay(2000);
+  
+//  digitalWrite(LEFT_EYE, HIGH);
+//  digitalWrite(RIGHT_EYE, LOW);
+//  delay(1000);
+//
+//  digitalWrite(LEFT_EYE, LOW);
+//  digitalWrite(RIGHT_EYE, HIGH);
+//  delay(1000);
+//
+//  digitalWrite(LEFT_EYE, HIGH);
+  
 //  int this_time = random(60);
 //  
 //  if (this_time >= 48)   // Blink 12 times a minute 
@@ -61,12 +76,12 @@ void loop() {
 }
 
 void blink() {
-  left.write(115);
-  right.write(65);
+  left.write(70);
+  right.write(110);
   delay(300);     // Humans blink for 300-400ms
 
-  left.write(175);
-  right.write(5);
+  left.write(LEFT_REST);
+  right.write(RIGHT_REST);
 }
 
 /**** FLICKER SEQUENCE ****
