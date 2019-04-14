@@ -7,6 +7,7 @@ written by Adafruit Industries
 #include "DHT.h"
 
 #define MIN_INTERVAL 2000
+#define TIMEOUT -1
 
 DHT::DHT(uint8_t pin, uint8_t type, uint8_t count) {
   _pin = pin;
@@ -18,17 +19,20 @@ DHT::DHT(uint8_t pin, uint8_t type, uint8_t count) {
   _maxcycles = microsecondsToClockCycles(1000);  // 1 millisecond timeout for
                                                  // reading pulses from DHT sensor.
   // Note that count is now ignored as the DHT reading algorithm adjusts itself
-  // basd on the speed of the processor.
+  // based on the speed of the processor.
 }
 
-void DHT::begin(void) {
+// Optionally pass pull-up time (in microseconds) before DHT reading starts.
+// Default is 55 (see function declaration in DHT.h).
+void DHT::begin(uint8_t usec) {
   // set up the pins!
   pinMode(_pin, INPUT_PULLUP);
   // Using this value makes sure that millis() - lastreadtime will be
   // >= MIN_INTERVAL right away. Note that this assignment wraps around,
   // but so will the subtraction.
-  _lastreadtime = -MIN_INTERVAL;
-  DEBUG_PRINT("Max clock cycles: "); DEBUG_PRINTLN(_maxcycles, DEC);
+  _lastreadtime = millis() - MIN_INTERVAL;
+  DEBUG_PRINT("DHT max clock cycles: "); DEBUG_PRINTLN(_maxcycles, DEC);
+  pullTime = usec;
 }
 
 //boolean S == Scale.  True == Fahrenheit; False == Celcius
@@ -39,15 +43,27 @@ float DHT::readTemperature(bool S, bool force) {
     switch (_type) {
     case DHT11:
       f = data[2];
+      if (data[3] & 0x80) {
+        f = -1 - f ;
+      }
+      f += (data[3] & 0x0f) * 0.1;
+      if(S) {
+        f = convertCtoF(f);
+      }
+      break;
+    case DHT12:
+      f = data[2];
+      f += (data[3] & 0x0f) * 0.1;
+      if (data[2] & 0x80) {
+        f *= -1;
+      }
       if(S) {
         f = convertCtoF(f);
       }
       break;
     case DHT22:
     case DHT21:
-      f = data[2] & 0x7F;
-      f *= 256;
-      f += data[3];
+      f = ((word)(data[2] & 0x7F)) << 8 | data[3];
       f *= 0.1;
       if (data[2] & 0x80) {
         f *= -1;
@@ -71,16 +87,15 @@ float DHT::convertFtoC(float f) {
 
 float DHT::readHumidity(bool force) {
   float f = NAN;
-  if (read()) {
+  if (read(force)) {
     switch (_type) {
     case DHT11:
-      f = data[0];
+    case DHT12:
+      f = data[0] + data[1] * 0.1;
       break;
     case DHT22:
     case DHT21:
-      f = data[0];
-      f *= 256;
-      f += data[1];
+      f = ((word)data[0]) << 8 | data[1];
       f *= 0.1;
       break;
     }
@@ -89,7 +104,15 @@ float DHT::readHumidity(bool force) {
 }
 
 //boolean isFahrenheit: True == Fahrenheit; False == Celcius
-float DHT::computeHeatIndex(float temperature, float percentHumidity, bool isFahrenheit) {
+float DHT::computeHeatIndex(bool isFahrenheit) {
+  float hi = computeHeatIndex(readTemperature(isFahrenheit), readHumidity(),
+    isFahrenheit);
+  return isFahrenheit ? hi : convertFtoC(hi);
+}
+
+//boolean isFahrenheit: True == Fahrenheit; False == Celcius
+float DHT::computeHeatIndex(float temperature, float percentHumidity,
+  bool isFahrenheit) {
   // Using both Rothfusz and Steadman's equations
   // http://www.wpc.ncep.noaa.gov/html/heatindex_equation.shtml
   float hi;
@@ -120,11 +143,11 @@ float DHT::computeHeatIndex(float temperature, float percentHumidity, bool isFah
   return isFahrenheit ? hi : convertFtoC(hi);
 }
 
-boolean DHT::read(bool force) {
+bool DHT::read(bool force) {
   // Check if sensor was read less than two seconds ago and return early
   // to use last reading.
   uint32_t currenttime = millis();
-  if (!force && ((currenttime - _lastreadtime) < 2000)) {
+  if (!force && ((currenttime - _lastreadtime) < MIN_INTERVAL)) {
     return _lastresult; // return last correct measurement
   }
   _lastreadtime = currenttime;
@@ -132,42 +155,55 @@ boolean DHT::read(bool force) {
   // Reset 40 bits of received data to zero.
   data[0] = data[1] = data[2] = data[3] = data[4] = 0;
 
+#if defined(ESP8266)
+    yield(); // Handle WiFi / reset software watchdog
+#endif
+
   // Send start signal.  See DHT datasheet for full signal diagram:
   //   http://www.adafruit.com/datasheets/Digital%20humidity%20and%20temperature%20sensor%20AM2302.pdf
 
   // Go into high impedence state to let pull-up raise data line level and
   // start the reading process.
-  digitalWrite(_pin, HIGH);
-  delay(250);
+  pinMode(_pin, INPUT_PULLUP);
+  delay(1);
 
-  // First set data line low for 20 milliseconds.
+  // First set data line low for a period according to sensor type
   pinMode(_pin, OUTPUT);
   digitalWrite(_pin, LOW);
-  delay(20);
+  switch(_type) {
+    case DHT22:
+    case DHT21:
+      delayMicroseconds(1100); // data sheet says "at least 1ms"
+      break;
+    case DHT11:
+    default:
+      delay(20); //data sheet says at least 18ms, 20ms just to be safe
+      break;
+  }
 
   uint32_t cycles[80];
   {
-    // Turn off interrupts temporarily because the next sections are timing critical
-    // and we don't want any interruptions.
-    InterruptLock lock;
-
     // End the start signal by setting data line high for 40 microseconds.
-    digitalWrite(_pin, HIGH);
-    delayMicroseconds(40);
+    pinMode(_pin, INPUT_PULLUP);
+
+    // Delay a moment to let sensor pull data line low.
+    delayMicroseconds(pullTime);
 
     // Now start reading the data line to get the value from the DHT sensor.
-    pinMode(_pin, INPUT_PULLUP);
-    delayMicroseconds(10);  // Delay a bit to let sensor pull data line low.
+
+    // Turn off interrupts temporarily because the next sections
+    // are timing critical and we don't want any interruptions.
+    InterruptLock lock;
 
     // First expect a low signal for ~80 microseconds followed by a high signal
     // for ~80 microseconds again.
-    if (expectPulse(LOW) == 0) {
-      DEBUG_PRINTLN(F("Timeout waiting for start signal low pulse."));
+    if (expectPulse(LOW) == TIMEOUT) {
+      DEBUG_PRINTLN(F("DHT timeout waiting for start signal low pulse."));
       _lastresult = false;
       return _lastresult;
     }
-    if (expectPulse(HIGH) == 0) {
-      DEBUG_PRINTLN(F("Timeout waiting for start signal high pulse."));
+    if (expectPulse(HIGH) == TIMEOUT) {
+      DEBUG_PRINTLN(F("DHT timeout waiting for start signal high pulse."));
       _lastresult = false;
       return _lastresult;
     }
@@ -191,8 +227,8 @@ boolean DHT::read(bool force) {
   for (int i=0; i<40; ++i) {
     uint32_t lowCycles  = cycles[2*i];
     uint32_t highCycles = cycles[2*i+1];
-    if ((lowCycles == 0) || (highCycles == 0)) {
-      DEBUG_PRINTLN(F("Timeout waiting for pulse."));
+    if ((lowCycles == TIMEOUT) || (highCycles == TIMEOUT)) {
+      DEBUG_PRINTLN(F("DHT timeout waiting for pulse."));
       _lastresult = false;
       return _lastresult;
     }
@@ -207,7 +243,7 @@ boolean DHT::read(bool force) {
     // stored data.
   }
 
-  DEBUG_PRINTLN(F("Received:"));
+  DEBUG_PRINTLN(F("Received from DHT:"));
   DEBUG_PRINT(data[0], HEX); DEBUG_PRINT(F(", "));
   DEBUG_PRINT(data[1], HEX); DEBUG_PRINT(F(", "));
   DEBUG_PRINT(data[2], HEX); DEBUG_PRINT(F(", "));
@@ -221,7 +257,7 @@ boolean DHT::read(bool force) {
     return _lastresult;
   }
   else {
-    DEBUG_PRINTLN(F("Checksum failure!"));
+    DEBUG_PRINTLN(F("DHT checksum failure!"));
     _lastresult = false;
     return _lastresult;
   }
@@ -235,14 +271,18 @@ boolean DHT::read(bool force) {
 // in the very latest IDE versions):
 //   https://github.com/arduino/Arduino/blob/master/hardware/arduino/avr/cores/arduino/wiring_pulse.c
 uint32_t DHT::expectPulse(bool level) {
+#if (F_CPU > 16000000L)
   uint32_t count = 0;
+#else
+  uint16_t count = 0; // To work fast enough on slower AVR boards
+#endif
   // On AVR platforms use direct GPIO port access as it's much faster and better
   // for catching pulses that are 10's of microseconds in length:
   #ifdef __AVR
     uint8_t portState = level ? _bit : 0;
     while ((*portInputRegister(_port) & _bit) == portState) {
       if (count++ >= _maxcycles) {
-        return 0; // Exceeded timeout, fail.
+        return TIMEOUT; // Exceeded timeout, fail.
       }
     }
   // Otherwise fall back to using digitalRead (this seems to be necessary on ESP8266
@@ -250,7 +290,7 @@ uint32_t DHT::expectPulse(bool level) {
   #else
     while (digitalRead(_pin) == level) {
       if (count++ >= _maxcycles) {
-        return 0; // Exceeded timeout, fail.
+        return TIMEOUT; // Exceeded timeout, fail.
       }
     }
   #endif
