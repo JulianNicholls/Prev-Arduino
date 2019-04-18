@@ -12,20 +12,7 @@
 const char ssid[] = "BTHub6-SZ8H";  //  your network SSID (name)
 const char pass[] = "RwyNcn7qdmqi";       // your network password
 
-// NTP Servers:
-IPAddress timeServer(195, 154, 223, 198); // uk.pool.ntp.org
-// IPAddress timeServer(132, 163, 4, 101); // time-a.timefreq.bldrdoc.gov
-// IPAddress timeServer(132, 163, 4, 102); // time-b.timefreq.bldrdoc.gov
-// IPAddress timeServer(132, 163, 4, 103); // time-c.timefreq.bldrdoc.gov
-
-
-const int timeZone = 1;     // Central European Time
-// const int timeZone = 1;     // Central European Time
-// const int timeZone = -5;  // Eastern Standard Time (USA)
-// const int timeZone = -4;  // Eastern Daylight Time (USA)
-// const int timeZone = -8;  // Pacific Standard Time (USA)
-// const int timeZone = -7;  // Pacific Daylight Time (USA)
-
+const int timeZone = 1;     // CET / BST
 
 WiFiUDP Udp;
 unsigned int localPort = 8888;  // local port to listen for UDP packets
@@ -33,11 +20,6 @@ unsigned int localPort = 8888;  // local port to listen for UDP packets
 void setup() 
 {
   Serial.begin(115200);
-  while (!Serial) ; // Needed for Leonardo only
-  delay(250);
-  Serial.println("TimeNTP Example");
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
 
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, pass);
@@ -50,10 +32,15 @@ void setup()
   
   Serial.print("IP number assigned by DHCP is ");
   Serial.println(WiFi.localIP());
+
   Serial.println("Starting UDP");
   Udp.begin(localPort);
   Serial.print("Local port: ");
   Serial.println(Udp.localPort());
+  
+  Serial.print("To: ");
+  Serial.println(Udp.remoteIP());
+  
   Serial.println("waiting for sync");
   setSyncProvider(getNtpTime);
 }
@@ -141,7 +128,7 @@ void sendNTPpacket(IPAddress &address)
   packetBuffer[15]  = 52;
   // all NTP fields have been given values, now
   // you can send a packet requesting a timestamp:                 
-  Udp.beginPacket(address, 123); //NTP requests are to port 123
+  Udp.beginPacket("uk.pool.ntp.org", 123); //NTP requests are to port 123
   Udp.write(packetBuffer, NTP_PACKET_SIZE);
   Udp.endPacket();
 }
