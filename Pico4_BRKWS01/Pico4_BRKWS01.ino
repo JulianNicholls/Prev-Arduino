@@ -6,7 +6,7 @@ void setup() {
 }
 
 void loop() {
-  if (Serial.available()) {         // If anything comes in from USB,
+  if (Serial.available()) {         // If anything comes in from USB,   
     Serial1.write(Serial.read());   // Read it and send it out Serial1
   }
 

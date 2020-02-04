@@ -42,7 +42,15 @@ void print_wakeup_reason()
 
 void setup() 
 {
+  // Set up and read the two inputs
+  pinMode(32, INPUT);   // Bottom input
+  pinMode(33, INPUT);   // Top input
+
+  int bottom = digitalRead(32);
+  int top    = digitalRead(33);
+  
   Serial.begin(115200);
+  Serial1.begin(9600, SERIAL_8N1);
   delay(1000);          // Take some time to open up the Serial Monitor
 
   // Increment boot number and print it every reboot
@@ -52,13 +60,6 @@ void setup()
   // Print the wakeup reason
   print_wakeup_reason();
 
-  // Set up and read the two inputs
-  pinMode(32, INPUT);   // Bottom input
-  pinMode(33, INPUT);   // Top input
-
-  int bottom = digitalRead(32);
-  int top    = digitalRead(33);
-  
   Serial.printf("Bottom: %02d, Top: %02d\n\n", digitalRead(32), digitalRead(33));
 
   long int      sleepTime = DEFAULT_SLEEP_TIME;
@@ -80,13 +81,13 @@ void setup()
     }
   }
   else if (bottom) {                  // Gutter is flowing
-    signal = "000100000001";          // Signal gutter is flowing
+    signal    = "000100000001";       // Signal gutter is flowing
     Serial.println("BOTTOM breached");
     sleepTime = SLEEP_TIME_AFTER_BOTTOM;
     bitMask   = TOP_ONLY_BITMASK;     // Wake if top is breached
   }
   else {                              // Wakeup was Timer
-    signal = "000000000000";          // Signal all is well
+    signal    = "000000000000";       // Signal all is well
     sleepTime = DEFAULT_SLEEP_TIME;   // and wait until tomorrow
     bitMask   = BOTH_PINS_BITMASK;    // Wake on either input
   }
@@ -94,24 +95,30 @@ void setup()
   // Set status bits for next boot
   bootData = (bootData & 0x0fff) | (bottom << 14) | (top << 15);
 
-  // Set SigFox message
-  Serial1.printf("AT$SF=%s\n", signal);
+  // Send SigFox message
+  Serial.printf("Sending '%s'\nReply: ", signal);
+  Serial1.printf("AT$SF=%s\r\n", signal);
+
+  // Wait for reply...
+  while (millis() < 11000) {
+    if(Serial1.available()) {
+      Serial.write(Serial1.read());
+    }
+  }
   
   // Set the wakeup for water inputs, if required
   if (bitMask) {
     esp_sleep_enable_ext1_wakeup(bitMask, ESP_EXT1_WAKEUP_ANY_HIGH);
   }
   
-  // Set the timer as a wakeup too.
+  // Set the timer as a wakeup.
   esp_sleep_enable_timer_wakeup(sleepTime * uS_TO_S_FACTOR);
 
-  Serial.printf("Setting up sleep for %ld seconds\n", sleepTime);
-
-  delay(2000);  // Delay for debugging
-  
-  Serial.println("Going to sleep now");
+  Serial.printf("Setting up sleep for %ld seconds.\nGoing to sleep now.\n", sleepTime);
   Serial.flush(); 
+
   esp_deep_sleep_start();
+  
   Serial.println("This will never be printed");
 }
 
