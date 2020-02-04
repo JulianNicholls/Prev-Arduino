@@ -35,8 +35,7 @@
 
 // Include the correct display library
 // For a connection via I2C using Wire include
-// #include <Wire.h>  // Only needed for Arduino 1.6.5 and earlier
-#include "SSD1306Wire.h" // legacy include: `#include "SSD1306.h"`
+#include "SSD1306Wire.h" 
 #include "OLEDDisplayUi.h"
 
 // Include custom images
@@ -45,7 +44,7 @@
 const char ssid[] = "BTHub6-SZ8H";  //  your network SSID (name)
 const char pass[] = "RwyNcn7qdmqi";       // your network password
 
-const int timeZone = 1;     // CET / BST
+const int timeZone = 0;     // CET / BST
 
 WiFiUDP udp;
 const unsigned int localPort = 8888;  // local port to listen for udp packets
@@ -53,19 +52,19 @@ const unsigned int localPort = 8888;  // local port to listen for udp packets
 // Initialize the OLED display using Wire library
 SSD1306Wire  display(0x3c, D3, D5);
 
-OLEDDisplayUi ui (&display);
+OLEDDisplayUi ui(&display);
 
 const int screenW = 128;
 const int screenH = 64;
-const int clockCenterX = screenW/2;
-const int clockCenterY = ((screenH-16)/2)+16;   // top yellow part is 16 px height
+const int clockCenterX = screenW / 2;
+const int clockCenterY = ((screenH - 16) / 2) + 16;   // top yellow part is 16 px height
 const int clockRadius = 23;
 
 // utility function for digital clock display: prints leading 0
 String twoDigits(int digits) {
-  if(digits < 10) {
-    String i = '0'+String(digits);
-    return i;
+  if (digits < 10) {
+    String d = '0' + String(digits);
+    return d;
   }
   else {
     return String(digits);
@@ -76,38 +75,40 @@ void clockOverlay(OLEDDisplay *display, OLEDDisplayUiState* state) {
 
 }
 
+float degToRad(int deg) {
+  return deg / 57.29577951;
+}
+
 void analogClockFrame(OLEDDisplay *display, OLEDDisplayUiState* state, int16_t x, int16_t y) {
   // Draw the clock face
-    display->drawCircle(clockCenterX + x, clockCenterY + y, clockRadius);
-//  display->drawCircle(clockCenterX + x, clockCenterY + y, 2);
+  // display->drawCircle(clockCenterX + x, clockCenterY + y, clockRadius);
+  display->drawCircle(clockCenterX + x, clockCenterY + y, 3);
  
   // hour ticks
   for(int z = 0; z < 360; z += 30) {
     // Begin at 0° and stop at 360°
-    float angle = z / 57.29577951; // Convert degrees to radians
+    float angle = degToRad(z); // Convert degrees to radians
     
     int x2 = (clockCenterX + (sin(angle) * clockRadius));
     int y2 = (clockCenterY - (cos(angle) * clockRadius));
     int x3 = (clockCenterX + (sin(angle) * (clockRadius - (clockRadius / 8))));
     int y3 = (clockCenterY - (cos(angle) * (clockRadius - (clockRadius / 8))));
     
-    display->drawLine( x2 + x, y2 + y, x3 + x, y3 + y);
+    display->drawLine(x2 + x, y2 + y, x3 + x, y3 + y);
   }
 
   // Display second hand
   
-  float angle = second() * 6;
-  angle /= 57.29577951; // Convert degrees to radians
+  float angle = degToRad(second() * 6);
   
-  int x3 = ( clockCenterX + ( sin(angle) * ( clockRadius - ( clockRadius / 5 ) ) ) );
-  int y3 = ( clockCenterY - ( cos(angle) * ( clockRadius - ( clockRadius / 5 ) ) ) );
+  int x3 = (clockCenterX + (sin(angle) * (clockRadius - (clockRadius / 5))));
+  int y3 = (clockCenterY - (cos(angle) * (clockRadius - (clockRadius / 5))));
   
   display->drawLine(clockCenterX + x, clockCenterY + y, x3 + x, y3 + y);
   
   // Display minute hand
   
-  angle = minute() * 6;
-  angle /= 57.29577951; // Convert degrees to radians
+  angle = degToRad(minute() * 6);
   
   x3 = (clockCenterX + (sin(angle) * (clockRadius - (clockRadius / 4))));
   y3 = (clockCenterY - (cos(angle) * (clockRadius - (clockRadius / 4))));
@@ -115,8 +116,7 @@ void analogClockFrame(OLEDDisplay *display, OLEDDisplayUiState* state, int16_t x
 
   // Display hour hand
   
-  angle = hour() * 30 + int((minute() / 12) * 6);
-  angle /= 57.29577951; // Convert degrees to radians
+  angle = degToRad(hour() * 30 + int((minute() / 12) * 6));
   
   x3 = (clockCenterX + (sin(angle) * (clockRadius - (clockRadius / 2))));
   y3 = (clockCenterY - (cos(angle) * (clockRadius - (clockRadius / 2))));
@@ -145,7 +145,6 @@ int overlaysCount = 1;
 
 void setup() {
   Serial.begin(115200);
-  Serial.println();
 
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, pass);
@@ -154,14 +153,16 @@ void setup() {
     delay(500);
     Serial.print(".");
   }
+
+  Serial.println();
   
   udp.begin(localPort);
-  Serial.print("Local port: ");
-  Serial.println(udp.localPort());
-  
   Serial.print("IP number assigned by DHCP is ");
   Serial.println(WiFi.localIP());
 
+  Serial.print("Local port: ");
+  Serial.println(udp.localPort());
+  
   Serial.println("Starting UDP");
 
 	// The ESP is capable of rendering 60fps in 80Mhz mode
@@ -270,18 +271,18 @@ void sendNTPpacket()
   packetBuffer[0] = 0b11100011;   // 0xE3, LI = 3 (Unsync'ed), Version = 4, Mode = 3 (Client)
   packetBuffer[1] = 0;            // Stratum = 0
   packetBuffer[2] = 6;            // Polling Interval = 6s
-  packetBuffer[3] = 0xEC;         // Peer Clock Precision = 1us
+  packetBuffer[3] = 0xEC;         // Peer Clock Precision = -18 = 1us
   
   // 8 bytes of zero for Root Delay and Root Dispersion
   
-  packetBuffer[12]  = 49;         // '1'
-  packetBuffer[13]  = 0x4E;       // 'N'
+  packetBuffer[12]  = 49;         // '1'  1N14 is a Nixie Tube
+  packetBuffer[13]  = 78;         // 'N'
   packetBuffer[14]  = 49;         // '1'
   packetBuffer[15]  = 52;         // '4'
   
   // Send a udp packet requesting a timestamp:
   
-  udp.beginPacket("uk.pool.ntp.org", 123); //NTP requests are to port 123
+  udp.beginPacket("uk.pool.ntp.org", 123); // NTP requests are to port 123
   udp.write(packetBuffer, NTP_PACKET_SIZE);
   udp.endPacket();
 }
