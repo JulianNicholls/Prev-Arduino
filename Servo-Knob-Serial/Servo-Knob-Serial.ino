@@ -15,7 +15,7 @@ int potpin = A0;  // analog pin used to connect the potentiometer
 int prev_angle;
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   myservo.attach(9);  // attaches the servo on pin 9 to the servo object
 }
@@ -37,4 +37,3 @@ void loop() {
   
   delay(50);
 }
-

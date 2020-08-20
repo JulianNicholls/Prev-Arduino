@@ -44,7 +44,8 @@
 const char ssid[] = "BTHub6-SZ8H";  //  your network SSID (name)
 const char pass[] = "RwyNcn7qdmqi";       // your network password
 
-const int timeZone = 0;     // CET / BST
+const int timeZone = 0;     // GMT / UTC / Zulu
+// const int timeZone = 1;     // CET / BST
 
 WiFiUDP udp;
 const unsigned int localPort = 8888;  // local port to listen for udp packets
@@ -58,7 +59,7 @@ const int screenW = 128;
 const int screenH = 64;
 const int clockCenterX = screenW / 2;
 const int clockCenterY = ((screenH - 16) / 2) + 16;   // top yellow part is 16 px height
-const int clockRadius = 23;
+const int clockRadius = 25;
 
 // utility function for digital clock display: prints leading 0
 String twoDigits(int digits) {
@@ -194,7 +195,7 @@ void setup() {
   // Initialising the UI will init the display too.
   ui.init();
 
-  display.flipScreenVertically();
+//  display.flipScreenVertically();
 
   unsigned long secsSinceStart = millis();
   // Unix time starts on Jan 1 1970. In seconds, that's 2208988800:
